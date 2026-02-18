@@ -22,6 +22,7 @@ function CoursesContent() {
   const [joinCode, setJoinCode] = useState("");
   const [groupData, setGroupData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [now] = useState(() => Date.now());
 
   useEffect(() => {
     Promise.all([
@@ -117,7 +118,7 @@ function CoursesContent() {
           {!loading && courses.length === 0 && <div className="text-center py-8 text-gray-400">아직 참여한 수업이 없습니다</div>}
           {courses.map((course) => {
             const nextSession = course.sessions?.[0];
-            const isLive = nextSession && new Date(nextSession.startsAt).getTime() - 600000 <= Date.now() && new Date(nextSession.endsAt).getTime() + 600000 >= Date.now();
+            const isLive = nextSession && new Date(nextSession.startsAt).getTime() - 600000 <= now && new Date(nextSession.endsAt).getTime() + 600000 >= now;
             return (
               <div key={course.id} onClick={() => router.push(`/courses/${course.id}`)} className="bg-white rounded-xl shadow p-5 cursor-pointer hover:shadow-md transition">
                 <div className="flex items-center justify-between">

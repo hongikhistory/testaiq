@@ -6,7 +6,7 @@ import { POINTS } from "@/lib/points";
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireAuth();
+    await requireAuth();
     const courseId = req.nextUrl.searchParams.get("courseId");
     const sessionId = req.nextUrl.searchParams.get("sessionId");
     const tag = req.nextUrl.searchParams.get("tag");

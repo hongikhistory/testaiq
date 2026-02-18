@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import AuthGuard, { useUser } from "@/components/AuthGuard";
 import NavBar from "@/components/NavBar";
 
 function TagsContent() {
   const { user } = useUser();
-  const router = useRouter();
   const [tags, setTags] = useState<string[]>([]);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [tagData, setTagData] = useState<{ summaries: unknown[]; questions: { id: string; title: string; status: string; author: { nickname: string }; _count: { answers: number } }[] } | null>(null);

@@ -21,9 +21,9 @@ function CourseContent({ courseId }: { courseId: string }) {
     fetch(`/api/course/${courseId}`).then((r) => r.json()).then((d) => setCourse(d.course));
   }, [courseId]);
 
-  if (!course) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" /></div>;
+  const [now] = useState(() => Date.now());
 
-  const now = Date.now();
+  if (!course) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" /></div>;
 
   return (
     <div className="min-h-screen bg-gray-50">

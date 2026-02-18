@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { getGateStatus } from "@/lib/gating";
 import { detectExternalId } from "@/lib/content-filter";
-import { POINTS } from "@/lib/points";
 
 export async function GET(req: NextRequest) {
   try {

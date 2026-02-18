@@ -32,7 +32,7 @@ function QAContent({ courseId }: { courseId: string }) {
     fetch(`/api/course/${courseId}`).then((r) => r.json()).then((d) => {
       if (d.course?.sessions) {
         setSessions(d.course.sessions);
-        if (!selectedSession && d.course.sessions.length > 0) setSelectedSession(d.course.sessions[0].id);
+        setSelectedSession((prev) => prev || (d.course.sessions.length > 0 ? d.course.sessions[0].id : ""));
       }
     });
   }, [courseId]);

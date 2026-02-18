@@ -24,17 +24,16 @@ function LiveContent({ courseId }: { courseId: string }) {
   const [remaining, setRemaining] = useState("");
   const [genLoading, setGenLoading] = useState(false);
 
-  function fetchNotes() {
-    fetch(`/api/live-note?sessionId=${sessionId}`).then((r) => r.json()).then((d) => {
-      setGate(d.gate);
-      setNotes(d.notes || []);
-    });
-  }
-
   useEffect(() => {
     if (!sessionId) return;
-    fetchNotes();
-    const interval = setInterval(fetchNotes, 5000);
+    function doFetch() {
+      fetch(`/api/live-note?sessionId=${sessionId}`).then((r) => r.json()).then((d) => {
+        setGate(d.gate);
+        setNotes(d.notes || []);
+      });
+    }
+    doFetch();
+    const interval = setInterval(doFetch, 5000);
     return () => clearInterval(interval);
   }, [sessionId]);
 
@@ -65,7 +64,10 @@ function LiveContent({ courseId }: { courseId: string }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setContent("");
-      fetchNotes();
+      fetch(`/api/live-note?sessionId=${sessionId}`).then((r) => r.json()).then((d) => {
+        setGate(d.gate);
+        setNotes(d.notes || []);
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "오류 발생");
     }
