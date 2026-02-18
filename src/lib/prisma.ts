@@ -25,7 +25,7 @@ function createClient() {
   const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3");
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const path = require("path");
-  const dbPath = path.join(process.cwd(), "prisma", "dev.db");
+  const dbPath = path.join(process.cwd(), "dev.db");
   const adapter = new PrismaBetterSqlite3({ url: dbPath });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new PrismaClient({ adapter } as any);
