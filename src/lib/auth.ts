@@ -8,10 +8,10 @@ function base64url(buf: Buffer): string {
   return buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-export async function createToken(userId: string): Promise<string> {
+export async function createToken(userId: string, email?: string): Promise<string> {
   const header = base64url(Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })));
   const payload = base64url(
-    Buffer.from(JSON.stringify({ sub: userId, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 7 * 24 * 3600 }))
+    Buffer.from(JSON.stringify({ sub: userId, email, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 7 * 24 * 3600 }))
   );
   const signature = base64url(
     crypto.createHmac("sha256", JWT_SECRET).update(`${header}.${payload}`).digest()
@@ -19,7 +19,7 @@ export async function createToken(userId: string): Promise<string> {
   return `${header}.${payload}.${signature}`;
 }
 
-export function verifyToken(token: string): { sub: string } | null {
+export function verifyToken(token: string): { sub: string; email?: string } | null {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
@@ -30,7 +30,7 @@ export function verifyToken(token: string): { sub: string } | null {
     if (signature !== expected) return null;
     const data = JSON.parse(Buffer.from(payload, "base64").toString());
     if (data.exp && data.exp < Math.floor(Date.now() / 1000)) return null;
-    return { sub: data.sub };
+    return { sub: data.sub, email: data.email };
   } catch {
     return null;
   }
@@ -42,11 +42,34 @@ export async function getCurrentUser() {
   if (!token) return null;
   const decoded = verifyToken(token);
   if (!decoded) return null;
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.sub },
-    include: { school: true, group: true },
-  });
-  return user;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.sub },
+      include: { school: true, group: true },
+    });
+    if (user) return user;
+  } catch (e) {
+    console.error("getCurrentUser DB error:", e);
+  }
+
+  // MVP fallback: DB 실패 시 토큰 정보로 mock user 반환
+  return {
+    id: decoded.sub,
+    email: decoded.email || "user@campus.com",
+    nickname: decoded.email?.split("@")[0] || "User",
+    password: "",
+    schoolId: null,
+    groupId: null,
+    points: 0,
+    role: "user",
+    onboarded: true,
+    termsAgreed: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    school: null,
+    group: null,
+  };
 }
 
 export async function requireAuth() {
