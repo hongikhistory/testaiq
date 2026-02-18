@@ -7,9 +7,12 @@ interface User {
   id: string;
   email: string;
   nickname: string | null;
+  avatar: string;
   schoolId: string | null;
   groupId: string | null;
   points: number;
+  level: number;
+  streak: number;
   role: string;
   onboarded: boolean;
   school: { id: string; name: string; countryCode: string } | null;

@@ -12,9 +12,13 @@ model User {
   email         String    @unique
   password      String
   nickname      String?
+  avatar        String    @default("") // emoji avatar
   schoolId      String?
   groupId       String?
   points        Int       @default(0)
+  level         Int       @default(1)
+  streak        Int       @default(0) // consecutive active days
+  lastActiveAt  DateTime?
   role          String    @default("user") // user | admin
   onboarded     Boolean   @default(false)
   termsAgreed   Boolean   @default(false)
@@ -28,6 +32,7 @@ model User {
   summaries     Summary[]
   questions     Question[]
   answers       Answer[]
+  reactions     Reaction[]
   reports       Report[]   @relation("ReporterReports")
   coursesCreated Course[]  @relation("CourseCreator")
   courseMembers  CourseMember[]
@@ -165,6 +170,19 @@ model Answer {
 
   question    Question @relation(fields: [questionId], references: [id])
   author      User     @relation(fields: [authorId], references: [id])
+}
+
+model Reaction {
+  id         String   @id @default(cuid())
+  userId     String
+  targetType String   // note | answer | summary | question
+  targetId   String
+  emoji      String   @default("helpful") // helpful | great | insightful | fire
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, targetType, targetId])
 }
 
 model Report {

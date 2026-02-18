@@ -19,13 +19,10 @@ export async function GET(req: NextRequest) {
     if (!member) return NextResponse.json({ error: "Not a course member" }, { status: 403 });
 
     const gate = getGateStatus(session.startsAt, session.endsAt);
-    if (gate.status !== "LIVE_OPEN") {
-      return NextResponse.json({ gate, notes: [] });
-    }
 
     const notes = await prisma.liveNote.findMany({
       where: { sessionId, status: "active" },
-      include: { author: { select: { id: true, nickname: true, schoolId: true } } },
+      include: { author: { select: { id: true, nickname: true, avatar: true, schoolId: true, school: { select: { name: true } } } } },
       orderBy: { createdAt: "desc" },
     });
 
