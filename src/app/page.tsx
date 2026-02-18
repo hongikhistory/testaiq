@@ -8,52 +8,67 @@ export default function LandingPage() {
   const [inviteCode, setInviteCode] = useState("");
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-      <div className="max-w-lg w-full text-center space-y-8">
-        <div>
-          <h1 className="text-5xl font-extrabold text-blue-600 mb-2">CampUs</h1>
-          <p className="text-lg text-gray-600">수업 기반 글로벌 학습 커뮤니티</p>
-          <p className="text-sm text-gray-500 mt-2">
-            수업 중엔 잠깐 열리는 라이브 노트, 수업 후엔 요약+Q&A로 남는 학습 공간
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-8">
+      <div className="max-w-md w-full text-center space-y-6">
+        {/* Hero */}
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur rounded-full px-4 py-1.5 text-xs text-indigo-600 font-medium border border-indigo-100">
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            12 students online now
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold">
+            <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 bg-clip-text text-transparent">CampUs</span>
+          </h1>
+          <p className="text-base sm:text-lg text-gray-600 font-medium">Campus Learning Community</p>
+          <p className="text-sm text-gray-400 max-w-xs mx-auto leading-relaxed">
+            Live notes during class. AI summaries after. Q&A archive forever.
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-8 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-700">파일럿 참여하기</h2>
+        {/* CTA Card */}
+        <div className="bg-white rounded-2xl shadow-lg shadow-blue-100/50 p-6 sm:p-8 space-y-4">
+          <h2 className="text-base font-bold text-gray-800">Join the Pilot</h2>
           <input
             type="text"
-            placeholder="초대 코드 입력"
+            placeholder="Enter invite code"
             value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value)}
-            className="w-full border rounded-lg px-4 py-3 text-center text-lg tracking-widest focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+            className="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-center text-base tracking-[0.3em] font-mono focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:outline-none transition placeholder:tracking-normal placeholder:font-sans"
           />
           <button
             onClick={() => router.push("/auth?invite=" + inviteCode)}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-500 text-white py-3.5 rounded-xl font-bold text-base hover:shadow-lg hover:shadow-blue-200 active:scale-[0.98] transition-all"
           >
-            시작하기
+            Get Started
           </button>
-          <p className="text-xs text-gray-400">이미 계정이 있나요?{" "}
-            <button onClick={() => router.push("/auth")} className="text-blue-500 underline">로그인</button>
+          <p className="text-xs text-gray-400">
+            Already have an account?{" "}
+            <button onClick={() => router.push("/auth")} className="text-blue-500 font-medium hover:underline">Sign in</button>
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 text-center text-sm">
-          <div className="bg-white/70 rounded-xl p-4">
-            <div className="text-2xl mb-1">&#x1F4DD;</div>
-            <div className="font-medium text-gray-700">라이브 노트</div>
-            <div className="text-xs text-gray-500">수업 시간에만 열리는 공동 필기</div>
-          </div>
-          <div className="bg-white/70 rounded-xl p-4">
-            <div className="text-2xl mb-1">&#x1F4CA;</div>
-            <div className="font-medium text-gray-700">자동 요약</div>
-            <div className="text-xs text-gray-500">AI 기반 1페이지 요약</div>
-          </div>
-          <div className="bg-white/70 rounded-xl p-4">
-            <div className="text-2xl mb-1">&#x1F4AC;</div>
-            <div className="font-medium text-gray-700">Q&A 아카이브</div>
-            <div className="text-xs text-gray-500">시험 대비 문답 축적</div>
-          </div>
+        {/* Features */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { emoji: "\uD83D\uDCDD", title: "Live Notes", desc: "Collaborative notes that open only during class", color: "from-blue-50 to-blue-100/50" },
+            { emoji: "\u2728", title: "AI Summary", desc: "One-page summary auto-generated after class", color: "from-purple-50 to-purple-100/50" },
+            { emoji: "\uD83D\uDCAC", title: "Q&A Archive", desc: "Questions & answers that build up for exams", color: "from-indigo-50 to-indigo-100/50" },
+          ].map((f) => (
+            <div key={f.title} className={`bg-gradient-to-br ${f.color} rounded-2xl p-4 sm:p-5 border border-white/60`}>
+              <div className="text-2xl mb-2">{f.emoji}</div>
+              <div className="font-bold text-sm text-gray-800">{f.title}</div>
+              <div className="text-xs text-gray-500 mt-1 leading-relaxed">{f.desc}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats */}
+        <div className="flex items-center justify-center gap-6 text-xs text-gray-400 pt-2">
+          <div><span className="font-bold text-gray-600 text-sm">2</span> Schools</div>
+          <div className="w-px h-3 bg-gray-200" />
+          <div><span className="font-bold text-gray-600 text-sm">3</span> Courses</div>
+          <div className="w-px h-3 bg-gray-200" />
+          <div><span className="font-bold text-gray-600 text-sm">44</span> Notes</div>
         </div>
       </div>
     </div>

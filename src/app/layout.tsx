@@ -1,15 +1,26 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CampUs - 수업 기반 글로벌 학습 커뮤니티",
-  description: "시간표 기반으로 수업 중엔 라이브 노트, 수업 후엔 요약+Q&A로 남는 글로벌 학습 커뮤니티",
+  title: "CampUs - Campus Learning Community",
+  description: "Live notes during class, AI summaries after class, Q&A archive for global campus learning",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
-      <body className="antialiased bg-gray-50 text-gray-900" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+      <body
+        className="antialiased bg-[#f8f9fb] text-gray-900"
+        style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif' }}
+      >
         {children}
       </body>
     </html>
