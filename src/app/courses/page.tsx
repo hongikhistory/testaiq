@@ -12,6 +12,20 @@ interface Course {
   isEnrolled: boolean; creatorName: string; noteCount: number;
 }
 
+const courseEmojis: Record<string, string> = {
+  CS: "💻", UX: "🎨", "경제": "📊", default: "📚",
+};
+
+function getCourseEmoji(tags: string): string {
+  try {
+    const parsed = JSON.parse(tags) as string[];
+    for (const tag of parsed) {
+      if (courseEmojis[tag]) return courseEmojis[tag];
+    }
+  } catch { /* empty */ }
+  return courseEmojis.default;
+}
+
 function CoursesContent() {
   const { user } = useUser();
   const router = useRouter();
@@ -80,132 +94,133 @@ function CoursesContent() {
   }
 
   const scores = groupData?.scores as Record<string, { school: { name: string; countryCode?: string }; score: number; memberCount: number }> | undefined;
-
   const enrolled = courses.filter((c) => c.isEnrolled);
   const available = courses.filter((c) => !c.isEnrolled);
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] has-bottom-nav">
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/50 to-white has-bottom-nav">
       <NavBar nickname={user?.nickname || ""} points={user?.points || 0} />
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
         {/* School Battle */}
         {scores && (
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-5 text-white">
-            <h2 className="text-sm font-semibold opacity-80 mb-3">School Battle</h2>
+          <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 rounded-3xl p-5 text-white shadow-lg shadow-violet-200/50">
+            <h2 className="text-sm font-bold opacity-90 mb-3 flex items-center gap-1.5">School Battle</h2>
             <div className="grid grid-cols-2 gap-3">
               {Object.values(scores).map((s, i) => (
-                <div key={i} className="bg-white/15 backdrop-blur rounded-xl p-3 text-center">
-                  <div className="text-xs opacity-80">{s.school.countryCode === "KR" ? "\uD83C\uDDF0\uD83C\uDDF7" : "\uD83C\uDDFA\uD83C\uDDF8"}</div>
+                <div key={i} className="bg-white/15 backdrop-blur rounded-2xl p-3.5 text-center">
+                  <div className="text-lg">{s.school.countryCode === "KR" ? "\uD83C\uDDF0\uD83C\uDDF7" : "\uD83C\uDDFA\uD83C\uDDF8"}</div>
                   <div className="font-bold text-sm mt-0.5 truncate">{s.school.name}</div>
                   <div className="text-2xl font-extrabold my-1">{s.score}<span className="text-sm font-normal opacity-70">P</span></div>
-                  <div className="text-[11px] opacity-70">{s.memberCount} members</div>
+                  <div className="text-[11px] opacity-70">{s.memberCount}명 참여</div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Quick Stats Banner */}
+        {/* Quick Stats */}
         {!loading && courses.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
-              <div className="text-xl font-extrabold text-blue-600">{courses.length}</div>
-              <div className="text-[11px] text-gray-400 mt-0.5">Courses</div>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
-              <div className="text-xl font-extrabold text-green-600">{courses.reduce((sum, c) => sum + c.noteCount, 0)}</div>
-              <div className="text-[11px] text-gray-400 mt-0.5">Notes</div>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
-              <div className="text-xl font-extrabold text-purple-600">{courses.reduce((sum, c) => sum + c._count.questions, 0)}</div>
-              <div className="text-[11px] text-gray-400 mt-0.5">Q&A</div>
-            </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            {[
+              { val: courses.length, label: "수업", color: "text-violet-600", bg: "bg-violet-50" },
+              { val: courses.reduce((sum, c) => sum + c.noteCount, 0), label: "노트", color: "text-emerald-600", bg: "bg-emerald-50" },
+              { val: courses.reduce((sum, c) => sum + c._count.questions, 0), label: "Q&A", color: "text-pink-600", bg: "bg-pink-50" },
+            ].map((s) => (
+              <div key={s.label} className={`${s.bg} rounded-2xl p-3.5 text-center border border-white`}>
+                <div className={`text-xl font-extrabold ${s.color}`}>{s.val}</div>
+                <div className="text-[11px] text-gray-400 mt-0.5 font-medium">{s.label}</div>
+              </div>
+            ))}
           </div>
         )}
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-2">
           <button onClick={() => { setShowCreate(!showCreate); setShowJoin(false); }}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-500 text-white px-4 py-3 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all">
-            + Create Course
+            className="flex-1 bg-gradient-to-r from-violet-600 to-purple-500 text-white px-4 py-3 rounded-2xl text-sm font-bold active:scale-[0.98] transition-all shadow-sm shadow-violet-200">
+            + 수업 만들기
           </button>
           <button onClick={() => { setShowJoin(!showJoin); setShowCreate(false); }}
-            className="flex-1 bg-white border border-gray-200 px-4 py-3 rounded-xl text-sm font-semibold text-gray-700 active:scale-[0.98] transition-all">
-            Join with Code
+            className="flex-1 bg-white border border-violet-200 px-4 py-3 rounded-2xl text-sm font-bold text-violet-700 active:scale-[0.98] transition-all">
+            코드로 참여하기
           </button>
         </div>
 
         {showCreate && (
-          <form onSubmit={createCourse} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-3">
-            <h3 className="font-bold text-sm">Create New Course</h3>
-            <input type="text" placeholder="Course title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-            <input type="text" placeholder="Description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-            <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold">Create</button>
+          <form onSubmit={createCourse} className="bg-white rounded-3xl shadow-sm border border-violet-100 p-5 space-y-3">
+            <h3 className="font-bold text-sm">새 수업 만들기</h3>
+            <input type="text" placeholder="수업 이름" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none" />
+            <input type="text" placeholder="설명 (선택)" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none" />
+            <button type="submit" className="w-full bg-violet-600 text-white py-3 rounded-2xl text-sm font-bold">만들기</button>
           </form>
         )}
 
         {showJoin && (
-          <form onSubmit={joinCourse} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-3">
-            <h3 className="font-bold text-sm">Join Course</h3>
-            <input type="text" placeholder="INVITE CODE" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} required className="w-full border border-gray-200 rounded-xl px-4 py-3 text-center tracking-[0.3em] font-mono text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-            <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold">Join</button>
+          <form onSubmit={joinCourse} className="bg-white rounded-3xl shadow-sm border border-violet-100 p-5 space-y-3">
+            <h3 className="font-bold text-sm">수업 참여하기</h3>
+            <input type="text" placeholder="초대 코드" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} required className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-center tracking-[0.3em] font-mono text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none" />
+            <button type="submit" className="w-full bg-violet-600 text-white py-3 rounded-2xl text-sm font-bold">참여하기</button>
           </form>
         )}
 
         {/* My Enrolled Courses */}
         <div className="space-y-3">
-          <h2 className="text-base font-bold text-gray-800">My Courses</h2>
-          {loading && <div className="text-center py-12"><div className="animate-spin h-6 w-6 border-3 border-blue-500 border-t-transparent rounded-full mx-auto" /></div>}
+          <h2 className="text-base font-bold text-gray-800">내 수업</h2>
+          {loading && <div className="text-center py-12"><div className="animate-spin h-6 w-6 border-3 border-violet-500 border-t-transparent rounded-full mx-auto" /></div>}
           {!loading && enrolled.length === 0 && (
-            <div className="text-center py-6 text-gray-400 text-sm">
-              {available.length > 0 ? "Join a course below to get started!" : "No courses yet. Create one!"}
+            <div className="text-center py-8 bg-white rounded-3xl border border-dashed border-violet-200">
+              <div className="text-3xl mb-2">📚</div>
+              <p className="text-gray-400 text-sm">{available.length > 0 ? "아래 수업에 참여해보세요!" : "아직 수업이 없어요. 만들어보세요!"}</p>
             </div>
           )}
           {enrolled.map((course) => {
             const nextSession = course.sessions?.[0];
             const isLive = nextSession && new Date(nextSession.startsAt).getTime() - 600000 <= now && new Date(nextSession.endsAt).getTime() + 600000 >= now;
             const tags: string[] = (() => { try { return JSON.parse(course.tags); } catch { return []; } })();
+            const emoji = getCourseEmoji(course.tags);
             return (
               <div key={course.id} onClick={() => router.push(`/courses/${course.id}`)}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 cursor-pointer hover:shadow-md active:scale-[0.99] transition-all">
-                <div className="flex items-start justify-between gap-3">
+                className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 sm:p-5 cursor-pointer card-hover">
+                <div className="flex items-start gap-3">
+                  <div className="w-11 h-11 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                    {emoji}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-bold text-sm sm:text-base truncate">{course.title}</h3>
                       {isLive && (
-                        <span className="flex items-center gap-1 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                        <span className="flex items-center gap-1 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
                           <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />LIVE
                         </span>
                       )}
                     </div>
-                    {course.description && <p className="text-xs text-gray-500 mt-1 line-clamp-1">{course.description}</p>}
+                    {course.description && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{course.description}</p>}
                     {tags.length > 0 && (
-                      <div className="flex gap-1 mt-2 flex-wrap">{tags.slice(0, 3).map((t) => <span key={t} className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{t}</span>)}</div>
+                      <div className="flex gap-1 mt-2 flex-wrap">
+                        {tags.slice(0, 3).map((t) => <span key={t} className="text-[10px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full font-medium">{t}</span>)}
+                      </div>
                     )}
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <div className="text-xs text-gray-400">{course._count.members} members</div>
-                    <div className="text-[10px] font-mono text-gray-300 mt-0.5">{course.inviteCode}</div>
-                  </div>
                 </div>
-                {/* Rich stats bar */}
+                {/* Stats bar */}
                 <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-4 text-[11px] text-gray-400">
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    {course.noteCount} notes
+                    <span className="text-violet-400">👥</span> {course._count.members}명
                   </span>
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {course._count.questions} Q&A
+                    <span className="text-emerald-400">📝</span> {course.noteCount}
                   </span>
                   <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {course._count.sessions} sessions
+                    <span className="text-pink-400">💬</span> {course._count.questions}
                   </span>
+                  <span className="flex items-center gap-1">
+                    <span className="text-amber-400">📅</span> {course._count.sessions}
+                  </span>
+                  <span className="ml-auto text-[10px] font-mono text-gray-300">{course.inviteCode}</span>
                 </div>
                 {nextSession && (
-                  <div className="mt-2 text-xs text-gray-400 flex items-center gap-1.5">
-                    Next: {new Date(nextSession.startsAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric", weekday: "short" })} {new Date(nextSession.startsAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+                  <div className="mt-2 text-xs text-gray-400">
+                    다음 수업: {new Date(nextSession.startsAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric", weekday: "short" })} {new Date(nextSession.startsAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
                   </div>
                 )}
               </div>
@@ -213,19 +228,23 @@ function CoursesContent() {
           })}
         </div>
 
-        {/* Available Courses to Join */}
+        {/* Available Courses */}
         {!loading && available.length > 0 && (
           <div className="space-y-3">
-            <h2 className="text-base font-bold text-gray-800">Available Courses</h2>
-            <p className="text-xs text-gray-400 -mt-2">Tap &quot;Join&quot; to enroll instantly</p>
+            <h2 className="text-base font-bold text-gray-800">참여 가능한 수업</h2>
+            <p className="text-xs text-gray-400 -mt-2">&quot;참여&quot; 버튼을 눌러 바로 등록하세요</p>
             {available.map((course) => {
               const tags: string[] = (() => { try { return JSON.parse(course.tags); } catch { return []; } })();
+              const emoji = getCourseEmoji(course.tags);
               return (
-                <div key={course.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 border-dashed p-4 sm:p-5">
-                  <div className="flex items-start justify-between gap-3">
+                <div key={course.id} className="bg-white rounded-3xl shadow-sm border border-dashed border-violet-200 p-4 sm:p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex items-center justify-center text-xl flex-shrink-0 opacity-70">
+                      {emoji}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-sm sm:text-base truncate">{course.title}</h3>
-                      {course.description && <p className="text-xs text-gray-500 mt-1 line-clamp-1">{course.description}</p>}
+                      {course.description && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{course.description}</p>}
                       {tags.length > 0 && (
                         <div className="flex gap-1 mt-2 flex-wrap">{tags.slice(0, 3).map((t) => <span key={t} className="text-[10px] bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full">{t}</span>)}</div>
                       )}
@@ -233,15 +252,15 @@ function CoursesContent() {
                     <button
                       onClick={() => quickJoin(course.inviteCode)}
                       disabled={joining === course.inviteCode}
-                      className="flex-shrink-0 bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-xl active:scale-95 transition-all disabled:opacity-50"
+                      className="flex-shrink-0 bg-gradient-to-r from-violet-600 to-purple-500 text-white text-xs font-bold px-4 py-2.5 rounded-2xl active:scale-95 transition-all disabled:opacity-50"
                     >
-                      {joining === course.inviteCode ? "..." : "Join"}
+                      {joining === course.inviteCode ? "..." : "참여"}
                     </button>
                   </div>
                   <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-4 text-[11px] text-gray-400">
-                    <span>{course._count.members} members</span>
-                    <span>{course.noteCount} notes</span>
-                    <span>{course._count.questions} Q&A</span>
+                    <span>👥 {course._count.members}명</span>
+                    <span>📝 {course.noteCount}</span>
+                    <span>💬 {course._count.questions}</span>
                     <span className="ml-auto text-gray-300">by {course.creatorName}</span>
                   </div>
                 </div>

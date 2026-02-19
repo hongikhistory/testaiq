@@ -93,17 +93,17 @@ function LiveContent({ courseId }: { courseId: string }) {
   const isOpen = gate?.status === "LIVE_OPEN";
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] has-bottom-nav">
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/50 to-white has-bottom-nav">
       <NavBar nickname={user?.nickname || ""} points={user?.points || 0} />
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
         {/* Back link */}
-        <Link href={`/courses/${courseId}`} className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-500 transition">
+        <Link href={`/courses/${courseId}`} className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-violet-500 transition">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           수업 홈
         </Link>
 
         {/* Live status banner */}
-        <div className={`rounded-2xl p-4 text-center font-semibold shadow-sm ${isOpen ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-red-100" : "bg-white border border-gray-100 text-gray-500"}`}>
+        <div className={`rounded-3xl p-4 text-center font-semibold shadow-sm ${isOpen ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-red-100" : "bg-white border border-gray-100 text-gray-500"}`}>
           {isOpen ? (
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
               <div className="flex items-center gap-2">
@@ -122,33 +122,33 @@ function LiveContent({ courseId }: { courseId: string }) {
         {/* Note input form */}
         {isOpen && (
           <>
-            <form onSubmit={postNote} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+            <form onSubmit={postNote} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="수업 내용을 공유해보세요..."
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 resize-none h-20 focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:outline-none text-sm transition"
+                className="w-full border border-gray-200 rounded-2xl px-4 py-3 resize-none h-20 focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:outline-none text-sm transition"
               />
-              {error && <p className="text-red-500 text-xs bg-red-50 rounded-lg px-3 py-2 mt-2">{error}</p>}
+              {error && <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2 mt-2">{error}</p>}
               <div className="flex justify-between items-center mt-3">
-                <span className="text-[10px] text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full">노트 작성 +1P</span>
-                <button type="submit" className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-semibold active:scale-[0.98] transition-all">
+                <span className="text-[10px] text-gray-400 bg-violet-50 text-violet-500 px-2.5 py-1 rounded-full font-medium">노트 작성 +1P</span>
+                <button type="submit" className="bg-gradient-to-r from-violet-600 via-purple-500 to-pink-500 text-white px-5 py-2.5 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all">
                   노트 작성
                 </button>
               </div>
             </form>
 
             {/* Live notes */}
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {notes.map((note) => {
                 const r = reactions[note.id];
                 return (
-                  <div key={note.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                  <div key={note.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 card-hover">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-7 h-7 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">
+                      <div className="w-7 h-7 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center text-xs font-bold text-violet-600">
                         {note.author.avatar || (note.author.nickname || "?")[0]}
                       </div>
-                      <span className="text-xs font-semibold text-gray-700">{note.author.nickname}</span>
+                      <span className="text-xs font-bold text-gray-700">{note.author.nickname}</span>
                       {note.author.school && <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">{note.author.school.name}</span>}
                       <span className="text-[10px] text-gray-300 ml-auto">{new Date(note.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
@@ -159,7 +159,7 @@ function LiveContent({ courseId }: { courseId: string }) {
                         const reacted = r?.userIds?.includes(user?.id || "");
                         return (
                           <button key={key} onClick={() => toggleReaction(note.id, key)}
-                            className={`text-xs px-2.5 py-1.5 rounded-full border transition-all active:scale-95 ${reacted ? "bg-blue-50 border-blue-200 shadow-sm" : "bg-gray-50 border-gray-100 hover:bg-gray-100"}`}>
+                            className={`text-xs px-2.5 py-1.5 rounded-full border transition-all active:scale-95 ${reacted ? "bg-violet-50 border-violet-200 shadow-sm" : "bg-gray-50 border-gray-100 hover:bg-gray-100"}`}>
                             {emoji} {count > 0 && <span className="ml-0.5 font-medium">{count}</span>}
                           </button>
                         );
@@ -169,7 +169,7 @@ function LiveContent({ courseId }: { courseId: string }) {
                 );
               })}
               {notes.length === 0 && (
-                <div className="text-center py-12">
+                <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
                   <div className="text-3xl mb-2">📝</div>
                   <p className="text-gray-400 text-sm">첫 번째 노트를 작성해보세요!</p>
                 </div>
@@ -180,41 +180,41 @@ function LiveContent({ courseId }: { courseId: string }) {
 
         {/* Closed session actions */}
         {!isOpen && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-4">
             <p className="text-center text-sm text-gray-500">수업이 끝났어요. 복습하고 요약을 만들어볼까요?</p>
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <button onClick={generateSummary} disabled={genLoading}
-                className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-5 py-3 rounded-xl text-xs font-semibold active:scale-[0.98] transition-all disabled:opacity-50">
+                className="bg-gradient-to-r from-violet-600 via-purple-500 to-pink-500 text-white px-5 py-3 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all disabled:opacity-50">
                 {genLoading ? "생성 중..." : "✨ AI 요약 생성 (+5P)"}
               </button>
               <Link href={`/courses/${courseId}/qa?sessionId=${sessionId}`}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-5 py-3 rounded-xl text-xs font-semibold text-center active:scale-[0.98] transition-all">
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-3 rounded-2xl text-xs font-bold text-center active:scale-[0.98] transition-all">
                 💬 질문하기 (+2P)
               </Link>
             </div>
-            {error && <p className="text-red-500 text-xs bg-red-50 rounded-lg px-3 py-2 text-center">{error}</p>}
+            {error && <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2 text-center">{error}</p>}
           </div>
         )}
 
         {/* Summary */}
         {summary && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-4">
             <h2 className="text-base font-bold flex items-center gap-2">✨ AI 수업 요약</h2>
             <div>
-              <h3 className="text-xs font-semibold text-gray-500 mb-2">핵심 내용</h3>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">핵심 내용</h3>
               <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{summary.keyPoints}</p>
             </div>
             <div>
-              <h3 className="text-xs font-semibold text-gray-500 mb-2">주요 용어</h3>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">주요 용어</h3>
               <div className="flex gap-2 flex-wrap">
-                {summary.terms.map((t, i) => <span key={i} className="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 px-3 py-1.5 rounded-full text-xs font-medium">{t}</span>)}
+                {summary.terms.map((t, i) => <span key={i} className="bg-gradient-to-r from-violet-50 to-purple-50 text-violet-600 px-3 py-1.5 rounded-full text-xs font-medium">{t}</span>)}
               </div>
             </div>
             <div>
-              <h3 className="text-xs font-semibold text-gray-500 mb-2">예상 질문</h3>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">예상 질문</h3>
               <div className="space-y-1.5">
                 {summary.expectedQuestions.map((q, i) => (
-                  <p key={i} className="text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">Q{i + 1}. {q}</p>
+                  <p key={i} className="text-sm text-gray-600 bg-violet-50/50 rounded-2xl px-3 py-2">Q{i + 1}. {q}</p>
                 ))}
               </div>
             </div>
@@ -223,15 +223,15 @@ function LiveContent({ courseId }: { courseId: string }) {
 
         {/* Past session notes */}
         {!isOpen && notes.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <h3 className="text-sm font-bold text-gray-600 flex items-center gap-2">📋 수업 노트 ({notes.length})</h3>
             {notes.map((note) => (
-              <div key={note.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+              <div key={note.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <div className="w-6 h-6 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center text-[10px] font-bold text-blue-600">
+                  <div className="w-6 h-6 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center text-[10px] font-bold text-violet-600">
                     {note.author.avatar || (note.author.nickname || "?")[0]}
                   </div>
-                  <span className="text-xs font-semibold text-gray-700">{note.author.nickname}</span>
+                  <span className="text-xs font-bold text-gray-700">{note.author.nickname}</span>
                   <span className="text-[10px] text-gray-300">{new Date(note.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
                 </div>
                 <p className="text-sm text-gray-600 leading-relaxed">{note.content}</p>
