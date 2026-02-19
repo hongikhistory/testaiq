@@ -93,74 +93,82 @@ function LiveContent({ courseId }: { courseId: string }) {
   const isOpen = gate?.status === "LIVE_OPEN";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50/50 to-white has-bottom-nav">
+    <div className="min-h-screen bg-mesh has-bottom-nav">
       <NavBar nickname={user?.nickname || ""} points={user?.points || 0} />
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
         {/* Back link */}
-        <Link href={`/courses/${courseId}`} className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-violet-500 transition">
+        <Link href={`/courses/${courseId}`} className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-500 transition">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           수업 홈
         </Link>
 
         {/* Live status banner */}
-        <div className={`rounded-3xl p-4 text-center font-semibold shadow-sm ${isOpen ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-red-100" : "bg-white border border-gray-100 text-gray-500"}`}>
-          {isOpen ? (
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-              <div className="flex items-center gap-2">
-                <span className="inline-block w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
-                <span className="text-sm font-bold">LIVE NOW</span>
+        {isOpen ? (
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 shadow-3d-lg p-5 text-white animate-slide-up">
+            <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10 blur-xl" />
+            <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/10 blur-xl" />
+            <div className="relative flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+              <div className="flex items-center gap-2.5">
+                <span className="live-dot" />
+                <span className="text-sm font-black tracking-wide">LIVE NOW</span>
               </div>
-              <span className="text-xs font-normal opacity-90">{remaining} 남음 &middot; {notes.length}개 노트</span>
+              <div className="flex items-center gap-3 text-xs font-medium opacity-90">
+                <span className="glass-dark px-3 py-1 rounded-full">{remaining} 남음</span>
+                <span className="glass-dark px-3 py-1 rounded-full">{notes.length}개 노트</span>
+              </div>
             </div>
-          ) : (
+          </div>
+        ) : (
+          <div className="card-3d p-5 text-center">
             <div className="flex items-center justify-center gap-2">
-              <span className="text-sm">수업이 종료되었습니다</span>
+              <span className="w-2.5 h-2.5 bg-slate-300 rounded-full" />
+              <span className="text-sm font-bold text-slate-500">수업이 종료되었습니다</span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Note input form */}
         {isOpen && (
           <>
-            <form onSubmit={postNote} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
+            <form onSubmit={postNote} className="card-3d p-5 space-y-3">
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="수업 내용을 공유해보세요..."
-                className="w-full border border-gray-200 rounded-2xl px-4 py-3 resize-none h-20 focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:outline-none text-sm transition"
+                className="w-full glass rounded-2xl px-4 py-3 resize-none h-20 focus:ring-2 focus:ring-indigo-400 focus:outline-none text-sm transition border-0"
               />
-              {error && <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2 mt-2">{error}</p>}
-              <div className="flex justify-between items-center mt-3">
-                <span className="text-[10px] text-gray-400 bg-violet-50 text-violet-500 px-2.5 py-1 rounded-full font-medium">노트 작성 +1P</span>
-                <button type="submit" className="bg-gradient-to-r from-violet-600 via-purple-500 to-pink-500 text-white px-5 py-2.5 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all">
+              {error && <p className="text-red-500 text-xs bg-red-50/80 backdrop-blur rounded-xl px-3 py-2">{error}</p>}
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-500 shadow-sm">+1P</span>
+                <button type="submit" className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white px-5 py-2.5 rounded-2xl text-xs font-bold btn-3d animate-gradient">
                   노트 작성
                 </button>
               </div>
             </form>
 
             {/* Live notes */}
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 stagger-children">
               {notes.map((note) => {
                 const r = reactions[note.id];
                 return (
-                  <div key={note.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 card-hover">
+                  <div key={note.id} className="card-3d p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-7 h-7 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center text-xs font-bold text-violet-600">
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center text-xs font-bold text-indigo-600 shadow-sm">
                         {note.author.avatar || (note.author.nickname || "?")[0]}
                       </div>
-                      <span className="text-xs font-bold text-gray-700">{note.author.nickname}</span>
-                      {note.author.school && <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">{note.author.school.name}</span>}
-                      <span className="text-[10px] text-gray-300 ml-auto">{new Date(note.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
+                      <span className="text-xs font-bold text-slate-700">{note.author.nickname}</span>
+                      {note.author.school && <span className="text-[10px] text-slate-400 glass px-2 py-0.5 rounded-full">{note.author.school.name}</span>}
+                      <span className="text-[10px] text-slate-300 ml-auto">{new Date(note.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{note.content}</p>
+                    <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{note.content}</p>
                     <div className="flex items-center gap-1.5 mt-3 flex-wrap">
                       {Object.entries(EMOJI_MAP).map(([key, emoji]) => {
                         const count = r?.emojis?.[key] || 0;
                         const reacted = r?.userIds?.includes(user?.id || "");
                         return (
                           <button key={key} onClick={() => toggleReaction(note.id, key)}
-                            className={`text-xs px-2.5 py-1.5 rounded-full border transition-all active:scale-95 ${reacted ? "bg-violet-50 border-violet-200 shadow-sm" : "bg-gray-50 border-gray-100 hover:bg-gray-100"}`}>
-                            {emoji} {count > 0 && <span className="ml-0.5 font-medium">{count}</span>}
+                            className={`text-xs px-2.5 py-1.5 rounded-xl transition-all active:scale-95 ${reacted ? "glass border border-indigo-200 shadow-sm" : "glass border border-white/50 hover:border-indigo-200"}`}>
+                            {emoji} {count > 0 && <span className="ml-0.5 font-bold">{count}</span>}
                           </button>
                         );
                       })}
@@ -169,9 +177,9 @@ function LiveContent({ courseId }: { courseId: string }) {
                 );
               })}
               {notes.length === 0 && (
-                <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
+                <div className="text-center py-12 card-3d" style={{ borderStyle: "dashed" }}>
                   <div className="text-3xl mb-2">📝</div>
-                  <p className="text-gray-400 text-sm">첫 번째 노트를 작성해보세요!</p>
+                  <p className="text-slate-400 text-sm">첫 번째 노트를 작성해보세요!</p>
                 </div>
               )}
             </div>
@@ -180,41 +188,44 @@ function LiveContent({ courseId }: { courseId: string }) {
 
         {/* Closed session actions */}
         {!isOpen && (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 space-y-4">
-            <p className="text-center text-sm text-gray-500">수업이 끝났어요. 복습하고 요약을 만들어볼까요?</p>
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+          <div className="card-3d p-6 space-y-4">
+            <p className="text-center text-sm text-slate-500 font-medium">수업이 끝났어요. 복습하고 요약을 만들어볼까요?</p>
+            <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
               <button onClick={generateSummary} disabled={genLoading}
-                className="bg-gradient-to-r from-violet-600 via-purple-500 to-pink-500 text-white px-5 py-3 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all disabled:opacity-50">
+                className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white px-5 py-3 rounded-2xl text-xs font-bold btn-3d animate-gradient disabled:opacity-50">
                 {genLoading ? "생성 중..." : "✨ AI 요약 생성 (+5P)"}
               </button>
               <Link href={`/courses/${courseId}/qa?sessionId=${sessionId}`}
-                className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-3 rounded-2xl text-xs font-bold text-center active:scale-[0.98] transition-all">
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-3 rounded-2xl text-xs font-bold text-center btn-3d">
                 💬 질문하기 (+2P)
               </Link>
             </div>
-            {error && <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2 text-center">{error}</p>}
+            {error && <p className="text-red-500 text-xs bg-red-50/80 backdrop-blur rounded-xl px-3 py-2 text-center">{error}</p>}
           </div>
         )}
 
         {/* Summary */}
         {summary && (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-4">
-            <h2 className="text-base font-bold flex items-center gap-2">✨ AI 수업 요약</h2>
+          <div className="card-3d p-5 space-y-4 animate-slide-up">
+            <h2 className="text-base font-bold flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-sm">✨</span>
+              AI 수업 요약
+            </h2>
             <div>
-              <h3 className="text-xs font-bold text-gray-500 mb-2">핵심 내용</h3>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{summary.keyPoints}</p>
+              <h3 className="text-xs font-bold text-slate-500 mb-2">핵심 내용</h3>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed glass rounded-2xl p-3">{summary.keyPoints}</p>
             </div>
             <div>
-              <h3 className="text-xs font-bold text-gray-500 mb-2">주요 용어</h3>
+              <h3 className="text-xs font-bold text-slate-500 mb-2">주요 용어</h3>
               <div className="flex gap-2 flex-wrap">
-                {summary.terms.map((t, i) => <span key={i} className="bg-gradient-to-r from-violet-50 to-purple-50 text-violet-600 px-3 py-1.5 rounded-full text-xs font-medium">{t}</span>)}
+                {summary.terms.map((t, i) => <span key={i} className="bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-600 px-3 py-1.5 rounded-xl text-xs font-bold border border-indigo-100">{t}</span>)}
               </div>
             </div>
             <div>
-              <h3 className="text-xs font-bold text-gray-500 mb-2">예상 질문</h3>
-              <div className="space-y-1.5">
+              <h3 className="text-xs font-bold text-slate-500 mb-2">예상 질문</h3>
+              <div className="space-y-2 stagger-children">
                 {summary.expectedQuestions.map((q, i) => (
-                  <p key={i} className="text-sm text-gray-600 bg-violet-50/50 rounded-2xl px-3 py-2">Q{i + 1}. {q}</p>
+                  <p key={i} className="text-sm text-slate-600 glass rounded-2xl px-4 py-2.5">Q{i + 1}. {q}</p>
                 ))}
               </div>
             </div>
@@ -224,19 +235,24 @@ function LiveContent({ courseId }: { courseId: string }) {
         {/* Past session notes */}
         {!isOpen && notes.length > 0 && (
           <div className="space-y-2.5">
-            <h3 className="text-sm font-bold text-gray-600 flex items-center gap-2">📋 수업 노트 ({notes.length})</h3>
-            {notes.map((note) => (
-              <div key={note.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="w-6 h-6 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center text-[10px] font-bold text-violet-600">
-                    {note.author.avatar || (note.author.nickname || "?")[0]}
+            <h3 className="text-sm font-bold text-slate-600 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-xs">📋</span>
+              수업 노트 ({notes.length})
+            </h3>
+            <div className="stagger-children space-y-2.5">
+              {notes.map((note) => (
+                <div key={note.id} className="card-3d p-4">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="w-7 h-7 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center text-[10px] font-bold text-indigo-600 shadow-sm">
+                      {note.author.avatar || (note.author.nickname || "?")[0]}
+                    </div>
+                    <span className="text-xs font-bold text-slate-700">{note.author.nickname}</span>
+                    <span className="text-[10px] text-slate-300">{new Date(note.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
                   </div>
-                  <span className="text-xs font-bold text-gray-700">{note.author.nickname}</span>
-                  <span className="text-[10px] text-gray-300">{new Date(note.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
+                  <p className="text-sm text-slate-600 leading-relaxed">{note.content}</p>
                 </div>
-                <p className="text-sm text-gray-600 leading-relaxed">{note.content}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
