@@ -8,7 +8,6 @@ import NavBar from "@/components/NavBar";
 interface Session { id: string; startsAt: string; endsAt: string; weekLabel: string | null }
 interface CourseDetail { id: string; title: string; description: string; inviteCode: string; sessions: Session[]; _count: { members: number; questions: number } }
 
-// === DEMO DATA for MVP ===
 const _now = Date.now();
 const DAY = 86400000;
 const HOUR = 3600000;
@@ -48,12 +47,8 @@ const DEMO_QUESTIONS: Record<string, { id: string; title: string; status: string
     { id: "q3", title: "Stack으로 괄호 매칭하는 코드 예시 있나요?", status: "open", tags: "[]", createdAt: new Date(_now - 2 * DAY).toISOString(), author: { nickname: "Sophia" }, _count: { answers: 2 }, session: { weekLabel: "Week 3", startsAt: new Date(_now - 3 * DAY).toISOString() } },
     { id: "q4", title: "BST에서 노드 삭제할 때 3가지 경우가 헷갈려요", status: "open", tags: "[]", createdAt: new Date(_now - 5 * HOUR).toISOString(), author: { nickname: "현우" }, _count: { answers: 1 }, session: { weekLabel: "Week 4", startsAt: new Date(_now - 2 * HOUR).toISOString() } },
   ],
-  "course-design": [
-    { id: "q5", title: "UX 포트폴리오에 꼭 들어가야 할 요소가 뭔가요?", status: "open", tags: "[]", createdAt: new Date(_now - 7 * DAY).toISOString(), author: { nickname: "지우" }, _count: { answers: 2 }, session: { weekLabel: "Week 1", startsAt: new Date(_now - 8 * DAY).toISOString() } },
-  ],
-  "course-econ": [
-    { id: "q6", title: "한미 금리 차이가 환율에 미치는 영향?", status: "solved", tags: "[]", createdAt: new Date(_now - 4 * DAY).toISOString(), author: { nickname: "도현" }, _count: { answers: 2 }, session: { weekLabel: "Week 1", startsAt: new Date(_now - 5 * DAY).toISOString() } },
-  ],
+  "course-design": [{ id: "q5", title: "UX 포트폴리오에 꼭 들어가야 할 요소가 뭔가요?", status: "open", tags: "[]", createdAt: new Date(_now - 7 * DAY).toISOString(), author: { nickname: "지우" }, _count: { answers: 2 }, session: { weekLabel: "Week 1", startsAt: new Date(_now - 8 * DAY).toISOString() } }],
+  "course-econ": [{ id: "q6", title: "한미 금리 차이가 환율에 미치는 영향?", status: "solved", tags: "[]", createdAt: new Date(_now - 4 * DAY).toISOString(), author: { nickname: "도현" }, _count: { answers: 2 }, session: { weekLabel: "Week 1", startsAt: new Date(_now - 5 * DAY).toISOString() } }],
 };
 
 function CourseContent({ courseId }: { courseId: string }) {
@@ -64,89 +59,65 @@ function CourseContent({ courseId }: { courseId: string }) {
   const [now] = useState(() => Date.now());
 
   useEffect(() => {
-    fetch(`/api/course/${courseId}`).then((r) => r.json()).then((d) => {
-      if (d.course) setCourse(d.course);
-    }).catch(() => {});
+    fetch(`/api/course/${courseId}`).then((r) => r.json()).then((d) => { if (d.course) setCourse(d.course); }).catch(() => {});
   }, [courseId]);
 
   if (!course) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-violet-50/50 to-white">
-      <div className="animate-spin h-6 w-6 border-3 border-violet-500 border-t-transparent rounded-full" />
+    <div className="min-h-screen flex items-center justify-center bg-mesh">
+      <div className="flex gap-1.5"><div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" /><div className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "0.15s" }} /><div className="w-2 h-2 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: "0.3s" }} /></div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50/50 to-white has-bottom-nav">
+    <div className="min-h-screen bg-mesh has-bottom-nav">
       <NavBar nickname={user?.nickname || ""} points={user?.points || 0} />
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
-        {/* Course Header */}
-        <div className="bg-white rounded-3xl shadow-sm border border-violet-100/50 p-5">
+        <div className="card-3d p-5 animate-slide-up">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <h1 className="text-lg sm:text-xl font-bold">{course.title}</h1>
-            <span className="text-[10px] bg-violet-50 text-violet-500 px-2.5 py-1 rounded-full font-mono self-start">{course.inviteCode}</span>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-800">{course.title}</h1>
+            <span className="text-[10px] bg-indigo-50 text-indigo-500 px-2.5 py-1 rounded-lg font-mono self-start font-semibold">{course.inviteCode}</span>
           </div>
-          {course.description && <p className="text-sm text-gray-400 mt-2">{course.description}</p>}
-          <div className="mt-3 flex gap-4 text-xs text-gray-400">
-            <span>👥 {course._count.members}명</span><span>💬 {course._count.questions}개 질문</span>
-          </div>
+          {course.description && <p className="text-sm text-slate-400 mt-2">{course.description}</p>}
+          <div className="mt-3 flex gap-4 text-xs text-slate-400 font-medium"><span>👥 {course._count.members}명</span><span>💬 {course._count.questions}개 질문</span></div>
         </div>
 
-        {/* Tab + Action */}
         <div className="flex items-center gap-2">
-          <div className="flex gap-1 bg-gray-100 rounded-2xl p-1 flex-1">
-            <button onClick={() => setTab("sessions")} className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === "sessions" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500"}`}>📅 수업 일정</button>
-            <button onClick={() => setTab("qa")} className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === "qa" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500"}`}>💬 Q&A</button>
+          <div className="flex gap-1 glass rounded-2xl p-1 flex-1">
+            <button onClick={() => setTab("sessions")} className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === "sessions" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500"}`}>📅 수업 일정</button>
+            <button onClick={() => setTab("qa")} className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === "qa" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500"}`}>💬 Q&A</button>
           </div>
-          <button onClick={() => router.push(`/courses/${courseId}/qa`)} className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2.5 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all whitespace-nowrap shadow-sm shadow-emerald-200">+ 질문</button>
+          <button onClick={() => router.push(`/courses/${courseId}/qa`)} className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold btn-3d whitespace-nowrap shadow-md shadow-emerald-200/30">+ 질문</button>
         </div>
 
-        {/* Sessions */}
         {tab === "sessions" && (
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 stagger-children">
             {course.sessions.map((session) => {
-              const start = new Date(session.startsAt).getTime();
-              const end = new Date(session.endsAt).getTime();
-              const isLive = start - 600000 <= now && end + 600000 >= now;
-              const isPast = end + 600000 < now;
+              const start = new Date(session.startsAt).getTime(); const end = new Date(session.endsAt).getTime();
+              const isLive = start - 600000 <= now && end + 600000 >= now; const isPast = end + 600000 < now;
               return (
-                <div key={session.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+                <div key={session.id} className={`card-3d p-4 ${isLive ? "animate-pulse-glow" : ""}`}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-lg ${isLive ? "bg-red-50" : isPast ? "bg-gray-50" : "bg-violet-50"}`}>
+                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg shadow-md ${isLive ? "bg-gradient-to-br from-red-500 to-pink-500 text-white" : isPast ? "bg-gradient-to-br from-slate-100 to-slate-200" : "bg-gradient-to-br from-indigo-100 to-purple-100"}`}>
                         {isLive ? "🔴" : isPast ? "✅" : "📅"}
                       </div>
                       <div>
-                        <div className="font-bold text-sm">{session.weekLabel || new Date(session.startsAt).toLocaleDateString("ko-KR")}</div>
-                        <div className="text-xs text-gray-400 mt-0.5">
-                          {new Date(session.startsAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} ~ {new Date(session.endsAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
-                        </div>
+                        <div className="font-bold text-sm text-slate-800">{session.weekLabel || new Date(session.startsAt).toLocaleDateString("ko-KR")}</div>
+                        <div className="text-xs text-slate-400 mt-0.5">{new Date(session.startsAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })} ~ {new Date(session.endsAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</div>
                       </div>
                     </div>
                     <div>
-                      {isLive && (
-                        <button onClick={() => router.push(`/courses/${courseId}/live?sessionId=${session.id}`)}
-                          className="flex items-center gap-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2.5 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all shadow-sm shadow-red-200">
-                          <span className="w-2 h-2 bg-white rounded-full animate-pulse" />실시간 참여
-                        </button>
-                      )}
-                      {isPast && (
-                        <button onClick={() => router.push(`/courses/${courseId}/live?sessionId=${session.id}&summary=1`)}
-                          className="bg-gray-100 text-gray-600 px-4 py-2.5 rounded-2xl text-xs font-bold hover:bg-gray-200 active:scale-[0.98] transition-all">노트 보기</button>
-                      )}
-                      {!isLive && !isPast && <span className="text-xs text-gray-300 bg-gray-50 px-3 py-2 rounded-2xl font-medium">예정</span>}
+                      {isLive && <button onClick={() => router.push(`/courses/${courseId}/live?sessionId=${session.id}`)} className="flex items-center gap-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold btn-3d shadow-md shadow-red-200/30"><span className="live-dot" style={{ width: 6, height: 6 }} />실시간 참여</button>}
+                      {isPast && <button onClick={() => router.push(`/courses/${courseId}/live?sessionId=${session.id}&summary=1`)} className="card-3d px-4 py-2.5 text-xs font-bold text-slate-600">노트 보기</button>}
+                      {!isLive && !isPast && <span className="text-xs text-slate-300 glass px-3 py-2 rounded-xl font-semibold">예정</span>}
                     </div>
                   </div>
                 </div>
               );
             })}
-            {course.sessions.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
-                <div className="text-3xl mb-2">📅</div><p className="text-gray-400 text-sm">아직 수업 일정이 없어요</p>
-              </div>
-            )}
+            {course.sessions.length === 0 && <div className="text-center py-12 card-3d" style={{ borderStyle: "dashed" }}><div className="text-3xl mb-2">📅</div><p className="text-slate-400 text-sm">아직 수업 일정이 없어요</p></div>}
           </div>
         )}
-
         {tab === "qa" && <QAList courseId={courseId} />}
       </div>
     </div>
@@ -156,35 +127,21 @@ function CourseContent({ courseId }: { courseId: string }) {
 function QAList({ courseId }: { courseId: string }) {
   const router = useRouter();
   const [questions, setQuestions] = useState(DEMO_QUESTIONS[courseId] || []);
-
-  useEffect(() => {
-    fetch(`/api/question?courseId=${courseId}`).then((r) => r.json()).then((d) => {
-      if (d.questions?.length > 0) setQuestions(d.questions);
-    }).catch(() => {});
-  }, [courseId]);
+  useEffect(() => { fetch(`/api/question?courseId=${courseId}`).then((r) => r.json()).then((d) => { if (d.questions?.length > 0) setQuestions(d.questions); }).catch(() => {}); }, [courseId]);
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2.5 stagger-children">
       {questions.map((q) => (
-        <div key={q.id} onClick={() => router.push(`/courses/${courseId}/qa?questionId=${q.id}`)}
-          className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 cursor-pointer card-hover">
+        <div key={q.id} onClick={() => router.push(`/courses/${courseId}/qa?questionId=${q.id}`)} className="card-3d p-4 cursor-pointer">
           <div className="flex items-center gap-2 mb-1.5">
-            <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold ${q.status === "solved" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-              {q.status === "solved" ? "해결" : "미해결"}
-            </span>
-            <span className="text-[10px] text-gray-300">{q.session?.weekLabel || new Date(q.session?.startsAt).toLocaleDateString("ko-KR")}</span>
+            <span className={`text-[10px] px-2.5 py-0.5 rounded-lg font-bold ${q.status === "solved" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{q.status === "solved" ? "해결" : "미해결"}</span>
+            <span className="text-[10px] text-slate-300 font-medium">{q.session?.weekLabel}</span>
           </div>
-          <h3 className="font-bold text-sm">{q.title}</h3>
-          <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-            <span>{q.author.nickname}</span><span>💬 {q._count.answers}개 답변</span>
-          </div>
+          <h3 className="font-bold text-sm text-slate-800">{q.title}</h3>
+          <div className="flex items-center gap-3 mt-2 text-xs text-slate-400"><span className="font-medium">{q.author.nickname}</span><span>💬 {q._count.answers}개 답변</span></div>
         </div>
       ))}
-      {questions.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
-          <div className="text-3xl mb-2">💬</div><p className="text-gray-400 text-sm">아직 질문이 없어요. 첫 질문을 올려보세요!</p>
-        </div>
-      )}
+      {questions.length === 0 && <div className="text-center py-12 card-3d" style={{ borderStyle: "dashed" }}><div className="text-3xl mb-2">💬</div><p className="text-slate-400 text-sm">아직 질문이 없어요</p></div>}
     </div>
   );
 }
