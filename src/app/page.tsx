@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
   const router = useRouter();
   const [inviteCode, setInviteCode] = useState("");
+  const [stats, setStats] = useState({ schools: 0, courses: 0, notes: 0, users: 0 });
+
+  useEffect(() => {
+    fetch("/api/stats").then((r) => r.json()).then(setStats).catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-8">
@@ -14,7 +19,7 @@ export default function LandingPage() {
         <div className="space-y-3">
           <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur rounded-full px-4 py-1.5 text-xs text-indigo-600 font-medium border border-indigo-100">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            12 students online now
+            {stats.users > 0 ? `${stats.users} students joined` : "Pilot in progress"}
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold">
             <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 bg-clip-text text-transparent">CampUs</span>
@@ -64,11 +69,11 @@ export default function LandingPage() {
 
         {/* Stats */}
         <div className="flex items-center justify-center gap-6 text-xs text-gray-400 pt-2">
-          <div><span className="font-bold text-gray-600 text-sm">2</span> Schools</div>
+          <div><span className="font-bold text-gray-600 text-sm">{stats.schools}</span> Schools</div>
           <div className="w-px h-3 bg-gray-200" />
-          <div><span className="font-bold text-gray-600 text-sm">3</span> Courses</div>
+          <div><span className="font-bold text-gray-600 text-sm">{stats.courses}</span> Courses</div>
           <div className="w-px h-3 bg-gray-200" />
-          <div><span className="font-bold text-gray-600 text-sm">44</span> Notes</div>
+          <div><span className="font-bold text-gray-600 text-sm">{stats.notes}</span> Notes</div>
         </div>
       </div>
     </div>

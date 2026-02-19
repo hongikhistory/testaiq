@@ -7,7 +7,7 @@ import NavBar from "@/components/NavBar";
 import Link from "next/link";
 
 interface Answer { id: string; body: string; isAccepted: boolean; createdAt: string; author: { id: string; nickname: string } }
-interface QuestionDetail { id: string; title: string; body: string; tags: string; status: string; authorId: string; acceptedAnswerId: string | null; createdAt: string; author: { nickname: string }; session: { weekLabel: string | null; startsAt: string } }
+interface QuestionDetail { id: string; title: string; body: string; tags: string; status: string; authorId: string; acceptedAnswerId: string | null; createdAt: string; author: { nickname: string }; session: { weekLabel: string | null; startsAt: string }; answers?: Answer[] }
 
 function QAContent({ courseId }: { courseId: string }) {
   const { user } = useUser();
@@ -41,10 +41,10 @@ function QAContent({ courseId }: { courseId: string }) {
     if (questionId && mode === "detail") {
       fetch(`/api/question?courseId=${courseId}`).then((r) => r.json()).then((d) => {
         const q = (d.questions || []).find((q: QuestionDetail) => q.id === questionId);
-        if (q) setQuestion(q);
-      });
-      fetch(`/api/question?courseId=${courseId}`).then(() => {
-        // load answers via question API
+        if (q) {
+          setQuestion(q);
+          setAnswers(q.answers || []);
+        }
       });
     }
   }, [questionId, courseId, mode]);
