@@ -90,18 +90,18 @@ function QAContent({ courseId }: { courseId: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] has-bottom-nav">
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/50 to-white has-bottom-nav">
       <NavBar nickname={user?.nickname || ""} points={user?.points || 0} />
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <Link href={`/courses/${courseId}`} className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-500 transition">
+          <Link href={`/courses/${courseId}`} className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-violet-500 transition">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             수업 홈
           </Link>
           {mode !== "create" && (
             <button onClick={() => setMode("create")}
-              className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold active:scale-[0.98] transition-all">
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2.5 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all shadow-sm shadow-emerald-200">
               + 질문 작성
             </button>
           )}
@@ -109,31 +109,31 @@ function QAContent({ courseId }: { courseId: string }) {
 
         {/* Create form */}
         {mode === "create" && (
-          <form onSubmit={createQuestion} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+          <form onSubmit={createQuestion} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-4">
             <h2 className="text-base font-bold flex items-center gap-2">💬 질문 작성</h2>
             <div>
               <label className="text-xs font-medium text-gray-500 ml-1">수업 회차</label>
               <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 mt-1 text-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:outline-none transition bg-white">
+                className="w-full border border-gray-200 rounded-2xl px-4 py-3 mt-1 text-sm focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:outline-none transition bg-white">
                 {sessions.map((s) => <option key={s.id} value={s.id}>{s.weekLabel || new Date(s.startsAt).toLocaleDateString("ko-KR")}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500 ml-1">제목</label>
               <input type="text" placeholder="질문 제목을 입력하세요" value={title} onChange={(e) => setTitle(e.target.value)} required
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 mt-1 text-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:outline-none transition" />
+                className="w-full border border-gray-200 rounded-2xl px-4 py-3 mt-1 text-sm focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:outline-none transition" />
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500 ml-1">내용</label>
               <textarea placeholder="궁금한 점을 자세히 적어주세요" value={body} onChange={(e) => setBody(e.target.value)} required
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 mt-1 h-32 resize-none text-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:outline-none transition" />
+                className="w-full border border-gray-200 rounded-2xl px-4 py-3 mt-1 h-32 resize-none text-sm focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:outline-none transition" />
             </div>
-            {error && <p className="text-red-500 text-xs bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+            {error && <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2">{error}</p>}
             <div className="flex gap-2">
-              <button type="submit" className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all">
+              <button type="submit" className="flex-1 bg-gradient-to-r from-violet-600 via-purple-500 to-pink-500 text-white py-3 rounded-2xl text-sm font-bold active:scale-[0.98] transition-all">
                 작성 완료 (+2P)
               </button>
-              <button type="button" onClick={() => setMode("list")} className="bg-gray-100 text-gray-600 px-5 py-3 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all">
+              <button type="button" onClick={() => setMode("list")} className="bg-gray-100 text-gray-600 px-5 py-3 rounded-2xl text-sm font-bold active:scale-[0.98] transition-all">
                 취소
               </button>
             </div>
@@ -142,18 +142,18 @@ function QAContent({ courseId }: { courseId: string }) {
 
         {/* Question list */}
         {mode === "list" && (
-          <div className="space-y-2">
-            <h2 className="text-base font-bold">Q&A</h2>
+          <div className="space-y-2.5">
+            <h2 className="text-lg font-bold">Q&A</h2>
             {questions.map((q) => (
               <div key={q.id} onClick={() => { setQuestion(q); setMode("detail"); router.push(`/courses/${courseId}/qa?questionId=${q.id}`); }}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:shadow-md active:scale-[0.99] transition-all">
+                className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 cursor-pointer card-hover">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${q.status === "solved" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                  <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold ${q.status === "solved" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
                     {q.status === "solved" ? "해결" : "미해결"}
                   </span>
-                  <span className="text-[10px] text-gray-400">{q.session?.weekLabel || new Date(q.session?.startsAt).toLocaleDateString("ko-KR")}</span>
+                  <span className="text-[10px] text-gray-300">{q.session?.weekLabel || new Date(q.session?.startsAt).toLocaleDateString("ko-KR")}</span>
                 </div>
-                <h3 className="font-semibold text-sm">{q.title}</h3>
+                <h3 className="font-bold text-sm">{q.title}</h3>
                 <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
                   <span>{q.author.nickname}</span>
                   <span>{new Date(q.createdAt).toLocaleDateString("ko-KR")}</span>
@@ -161,9 +161,9 @@ function QAContent({ courseId }: { courseId: string }) {
               </div>
             ))}
             {questions.length === 0 && (
-              <div className="text-center py-12">
+              <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
                 <div className="text-3xl mb-2">💬</div>
-                <p className="text-gray-400 text-sm">아직 질문이 없습니다. 첫 질문을 남겨보세요!</p>
+                <p className="text-gray-400 text-sm">아직 질문이 없어요. 첫 질문을 올려보세요!</p>
               </div>
             )}
           </div>
@@ -173,9 +173,9 @@ function QAContent({ courseId }: { courseId: string }) {
         {mode === "detail" && question && (
           <div className="space-y-3">
             {/* Question card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
               <div className="flex items-center gap-2 mb-3">
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${question.status === "solved" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold ${question.status === "solved" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
                   {question.status === "solved" ? "해결" : "미해결"}
                 </span>
                 <span className="text-[10px] text-gray-400">{question.session?.weekLabel || new Date(question.session?.startsAt).toLocaleDateString("ko-KR")}</span>
@@ -183,7 +183,7 @@ function QAContent({ courseId }: { courseId: string }) {
               <h2 className="text-base font-bold mb-2">{question.title}</h2>
               <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{question.body}</p>
               <div className="text-xs text-gray-400 mt-3 flex items-center gap-2">
-                <span className="bg-gray-50 px-2 py-0.5 rounded-full">{question.author.nickname}</span>
+                <span className="bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full font-medium">{question.author.nickname}</span>
                 <span>{new Date(question.createdAt).toLocaleDateString("ko-KR")}</span>
               </div>
             </div>
@@ -191,16 +191,16 @@ function QAContent({ courseId }: { courseId: string }) {
             {/* Answers */}
             <h3 className="text-sm font-bold text-gray-600 flex items-center gap-1.5">💡 답변 ({answers.length})</h3>
             {answers.map((a) => (
-              <div key={a.id} className={`bg-white rounded-2xl shadow-sm border p-4 ${a.isAccepted ? "border-green-300 bg-green-50/30" : "border-gray-100"}`}>
+              <div key={a.id} className={`bg-white rounded-3xl shadow-sm border p-4 ${a.isAccepted ? "border-emerald-300 bg-emerald-50/30" : "border-gray-100"}`}>
                 {a.isAccepted && (
-                  <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold mb-2 inline-block">✅ 채택됨</span>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold mb-2 inline-block">✅ 채택됨</span>
                 )}
                 <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{a.body}</p>
                 <div className="flex items-center justify-between mt-3">
                   <span className="text-xs text-gray-400">{a.author.nickname}</span>
                   {question.authorId === user?.id && !question.acceptedAnswerId && (
                     <button onClick={() => acceptAnswer(a.id)}
-                      className="text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3.5 py-1.5 rounded-lg font-semibold active:scale-95 transition-all">
+                      className="text-xs bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-3.5 py-1.5 rounded-full font-bold active:scale-95 transition-all">
                       채택하기 (+10P)
                     </button>
                   )}
@@ -209,23 +209,23 @@ function QAContent({ courseId }: { courseId: string }) {
             ))}
 
             {/* Answer form */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 space-y-3">
               <textarea
                 placeholder="답변을 작성해주세요... (+3P)"
                 value={answerBody}
                 onChange={(e) => setAnswerBody(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 h-24 resize-none text-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:outline-none transition"
+                className="w-full border border-gray-200 rounded-2xl px-4 py-3 h-24 resize-none text-sm focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:outline-none transition"
               />
-              {error && <p className="text-red-500 text-xs bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+              {error && <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2">{error}</p>}
               <button onClick={postAnswer}
-                className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-2.5 rounded-xl text-xs font-semibold active:scale-[0.98] transition-all">
+                className="w-full sm:w-auto bg-gradient-to-r from-violet-600 via-purple-500 to-pink-500 text-white px-6 py-2.5 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all">
                 답변 작성
               </button>
             </div>
 
             {/* Back to list */}
             <button onClick={() => { setMode("list"); router.push(`/courses/${courseId}/qa`); }}
-              className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-500 transition">
+              className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-violet-500 transition">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               목록으로 돌아가기
             </button>

@@ -24,35 +24,30 @@ function LeaderboardContent() {
     });
   }, []);
 
-  const levelNames = ["", "Beginner", "Active", "Contributor", "Expert", "Master"];
-
   function isOnline(lastActive: string | null) {
     if (!lastActive) return false;
     return Date.now() - new Date(lastActive).getTime() < 86400000;
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] has-bottom-nav">
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/50 to-white has-bottom-nav">
       <NavBar nickname={user?.nickname || ""} points={user?.points || 0} />
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
         <h1 className="text-lg font-bold">랭킹</h1>
 
-        {/* Tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+        <div className="flex gap-1 bg-gray-100 rounded-2xl p-1">
           <button onClick={() => setTab("users")}
-            className={`flex-1 py-2.5 rounded-lg text-xs font-semibold transition ${tab === "users" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500"}`}>
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === "users" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500"}`}>
             🏆 Top Learners
           </button>
           <button onClick={() => setTab("schools")}
-            className={`flex-1 py-2.5 rounded-lg text-xs font-semibold transition ${tab === "schools" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500"}`}>
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === "schools" ? "bg-white text-gray-800 shadow-sm" : "text-gray-500"}`}>
             🏫 School Battle
           </button>
         </div>
 
-        {/* User ranking */}
         {tab === "users" && (
-          <div className="space-y-2">
-            {/* Top 3 podium */}
+          <div className="space-y-2.5">
             {users.length >= 3 && (
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {[users[1], users[0], users[2]].map((u, idx) => {
@@ -60,19 +55,20 @@ function LeaderboardContent() {
                   const isMe = u.id === user?.id;
                   const heights = ["h-20", "h-24", "h-16"];
                   const medals = ["🥈", "🥇", "🥉"];
+                  const bgColors = ["from-gray-200 to-gray-300", "from-amber-300 to-yellow-400", "from-amber-600 to-amber-500"];
                   return (
                     <div key={u.id} className={`flex flex-col items-center justify-end ${isMe ? "scale-105" : ""}`}>
                       <div className="relative mb-1">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${rank === 1 ? "bg-gradient-to-br from-yellow-300 to-amber-400 text-white ring-2 ring-yellow-200" : "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600"}`}>
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${rank === 1 ? "bg-gradient-to-br from-amber-200 to-yellow-300 ring-2 ring-amber-200 shadow-lg shadow-amber-100" : "bg-gradient-to-br from-gray-100 to-gray-200"}`}>
                           {u.avatar || (u.nickname || "?")[0]}
                         </div>
                         {isOnline(u.lastActiveAt) && (
                           <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
                         )}
                       </div>
-                      <span className="text-[10px] font-semibold text-gray-700 truncate max-w-full">{u.nickname}</span>
-                      <span className="text-[10px] text-gray-400">{u.points}P</span>
-                      <div className={`w-full ${heights[idx]} bg-gradient-to-t ${rank === 1 ? "from-yellow-400 to-amber-300" : rank === 2 ? "from-gray-300 to-gray-200" : "from-amber-600 to-amber-500"} rounded-t-xl mt-1 flex items-start justify-center pt-1`}>
+                      <span className="text-[10px] font-bold text-gray-700 truncate max-w-full">{u.nickname}</span>
+                      <span className="text-[10px] text-gray-400 font-medium">{u.points}P</span>
+                      <div className={`w-full ${heights[idx]} bg-gradient-to-t ${bgColors[idx]} rounded-t-2xl mt-1 flex items-start justify-center pt-1.5`}>
                         <span className="text-lg">{medals[idx]}</span>
                       </div>
                     </div>
@@ -81,18 +77,16 @@ function LeaderboardContent() {
               </div>
             )}
 
-            {/* Rest of rankings */}
             {users.map((u, i) => {
               if (i < 3) return null;
-              const rank = i + 1;
               const isMe = u.id === user?.id;
               return (
-                <div key={u.id} className={`bg-white rounded-2xl shadow-sm border p-4 flex items-center gap-3 ${isMe ? "border-blue-300 bg-blue-50/30" : "border-gray-100"}`}>
+                <div key={u.id} className={`bg-white rounded-3xl shadow-sm border p-4 flex items-center gap-3 ${isMe ? "border-violet-300 bg-violet-50/30" : "border-gray-100"}`}>
                   <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-gray-100 text-gray-500">
-                    {rank}
+                    {i + 1}
                   </div>
                   <div className="relative">
-                    <div className="w-9 h-9 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">
+                    <div className="w-9 h-9 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center text-sm font-bold text-violet-600">
                       {u.avatar || (u.nickname || "?")[0]}
                     </div>
                     {isOnline(u.lastActiveAt) && (
@@ -101,30 +95,29 @@ function LeaderboardContent() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-sm font-semibold truncate">{u.nickname}</span>
-                      <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Lv.{u.level}</span>
-                      {u.streak >= 3 && <span className="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full">🔥{u.streak}d</span>}
+                      <span className="text-sm font-bold truncate">{u.nickname}</span>
+                      <span className="text-[10px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full font-bold">Lv.{u.level}</span>
+                      {u.streak >= 3 && <span className="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-bold">🔥{u.streak}일</span>}
                     </div>
                     <div className="text-[10px] text-gray-400 flex gap-2 mt-0.5">
                       <span>{u.school?.name}</span>
-                      <span>노트 {u._count.liveNotes}</span>
-                      <span>Q&A {u._count.questions + u._count.answers}</span>
+                      <span>📝 {u._count.liveNotes}</span>
+                      <span>💬 {u._count.questions + u._count.answers}</span>
                     </div>
                   </div>
-                  <div className="text-sm font-bold text-yellow-600">{u.points}P</div>
+                  <div className="text-sm font-extrabold text-amber-500">{u.points}P</div>
                 </div>
               );
             })}
             {users.length === 0 && (
-              <div className="text-center py-12">
+              <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
                 <div className="text-3xl mb-2">🏆</div>
-                <p className="text-gray-400 text-sm">아직 랭킹 데이터가 없습니다</p>
+                <p className="text-gray-400 text-sm">아직 랭킹 데이터가 없어요</p>
               </div>
             )}
           </div>
         )}
 
-        {/* School battle */}
         {tab === "schools" && (
           <div className="space-y-3">
             {schools.map((s, i) => {
@@ -132,7 +125,7 @@ function LeaderboardContent() {
               const pct = Math.round((s.totalPoints / maxPts) * 100);
               const flag = s.countryCode === "KR" ? "🇰🇷" : "🇺🇸";
               return (
-                <div key={s.id} className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-5 ${i === 0 ? "ring-2 ring-yellow-300" : ""}`}>
+                <div key={s.id} className={`bg-white rounded-3xl shadow-sm border p-5 ${i === 0 ? "border-amber-200 ring-2 ring-amber-100" : "border-gray-100"}`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <span className="text-xl font-extrabold text-gray-200">#{i + 1}</span>
@@ -141,18 +134,18 @@ function LeaderboardContent() {
                         <div className="text-[10px] text-gray-400">{s.memberCount}명 참여</div>
                       </div>
                     </div>
-                    <div className="text-lg font-extrabold bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">{s.totalPoints}P</div>
+                    <div className="text-lg font-extrabold bg-gradient-to-r from-violet-600 to-purple-500 bg-clip-text text-transparent">{s.totalPoints}P</div>
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
-                    <div className={`h-full rounded-full transition-all duration-1000 ${i === 0 ? "bg-gradient-to-r from-yellow-400 to-amber-400" : "bg-gradient-to-r from-blue-400 to-indigo-400"}`} style={{ width: `${pct}%` }} />
+                    <div className={`h-full rounded-full transition-all duration-1000 ${i === 0 ? "bg-gradient-to-r from-amber-400 to-yellow-400" : "bg-gradient-to-r from-violet-400 to-purple-400"}`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );
             })}
             {schools.length === 0 && (
-              <div className="text-center py-12">
+              <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
                 <div className="text-3xl mb-2">🏫</div>
-                <p className="text-gray-400 text-sm">학교 배틀 데이터가 없습니다</p>
+                <p className="text-gray-400 text-sm">학교 배틀 데이터가 없어요</p>
               </div>
             )}
           </div>

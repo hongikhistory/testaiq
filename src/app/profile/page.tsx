@@ -12,12 +12,12 @@ interface EventItem {
 const levelNames = ["", "Beginner", "Active Learner", "Contributor", "Expert", "Master"];
 const levelThresholds = [0, 0, 20, 50, 80, 150];
 const badgeList = [
-  { name: "첫 걸음", desc: "10P", icon: "\uD83D\uDC63", threshold: 10 },
-  { name: "열심히 배우는 중", desc: "30P", icon: "\uD83D\uDCD6", threshold: 30 },
-  { name: "기여자", desc: "50P", icon: "\u2B50", threshold: 50 },
-  { name: "지식 공유자", desc: "100P", icon: "\uD83C\uDFC6", threshold: 100 },
-  { name: "학습 리더", desc: "200P", icon: "\uD83D\uDC51", threshold: 200 },
-  { name: "캠퍼스 레전드", desc: "500P", icon: "\uD83D\uDE80", threshold: 500 },
+  { name: "첫 걸음", desc: "10P 달성", icon: "\uD83D\uDC63", threshold: 10 },
+  { name: "열심히 배우는 중", desc: "30P 달성", icon: "\uD83D\uDCD6", threshold: 30 },
+  { name: "기여자", desc: "50P 달성", icon: "\u2B50", threshold: 50 },
+  { name: "지식 공유자", desc: "100P 달성", icon: "\uD83C\uDFC6", threshold: 100 },
+  { name: "학습 리더", desc: "200P 달성", icon: "\uD83D\uDC51", threshold: 200 },
+  { name: "캠퍼스 레전드", desc: "500P 달성", icon: "\uD83D\uDE80", threshold: 500 },
 ];
 
 const eventLabels: Record<string, string> = {
@@ -43,7 +43,6 @@ function ProfileContent() {
 
   const avatar = user.avatar || (user.nickname || "?")[0];
   const streak = user.streak || 0;
-
   const badges = badgeList.filter((b) => user.points >= b.threshold);
   const nextBadge = badgeList.find((b) => user.points < b.threshold);
   const level = user.points >= 150 ? 5 : user.points >= 80 ? 4 : user.points >= 50 ? 3 : user.points >= 20 ? 2 : 1;
@@ -67,56 +66,55 @@ function ProfileContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] has-bottom-nav">
+    <div className="min-h-screen bg-gradient-to-b from-violet-50/50 to-white has-bottom-nav">
       <NavBar nickname={user.nickname || ""} points={user.points} />
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
         {/* Profile Card */}
-        <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-200/50 p-5 text-white">
+        <div className="bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 rounded-3xl shadow-lg shadow-violet-200/50 p-5 text-white">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-2xl backdrop-blur-sm">
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl backdrop-blur-sm">
               {avatar}
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-lg font-bold truncate">{user.nickname}</h1>
-              <p className="text-blue-100 text-xs">{user.school?.name || "학교 미설정"}</p>
+              <p className="text-violet-100 text-xs">{user.school?.name || "학교 미설정"}</p>
             </div>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-            <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
+            <div className="bg-white/10 rounded-2xl p-2.5 backdrop-blur-sm">
               <div className="text-xl font-extrabold">{user.points}</div>
-              <div className="text-[10px] text-blue-100">포인트</div>
+              <div className="text-[10px] text-violet-100">포인트</div>
             </div>
-            <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
+            <div className="bg-white/10 rounded-2xl p-2.5 backdrop-blur-sm">
               <div className="text-xl font-extrabold">Lv.{level}</div>
-              <div className="text-[10px] text-blue-100">{levelNames[level]}</div>
+              <div className="text-[10px] text-violet-100">{levelNames[level]}</div>
             </div>
-            <div className="bg-white/10 rounded-xl p-2.5 backdrop-blur-sm">
+            <div className="bg-white/10 rounded-2xl p-2.5 backdrop-blur-sm">
               <div className="text-xl font-extrabold">{streak}일</div>
-              <div className="text-[10px] text-blue-100">연속 출석</div>
+              <div className="text-[10px] text-violet-100">연속 출석</div>
             </div>
           </div>
-          {/* Level Progress */}
           <div className="mt-3">
-            <div className="flex justify-between text-[10px] text-blue-100 mb-1">
+            <div className="flex justify-between text-[10px] text-violet-100 mb-1">
               <span>Lv.{level} {levelNames[level]}</span>
               <span>{level < 5 ? `${user.points}/${nextThreshold}P` : "MAX"}</span>
             </div>
             <div className="w-full bg-white/20 rounded-full h-2">
-              <div className="h-full bg-yellow-400 rounded-full transition-all" style={{ width: `${levelProgress}%` }} />
+              <div className="h-full bg-amber-400 rounded-full transition-all" style={{ width: `${levelProgress}%` }} />
             </div>
           </div>
         </div>
 
         {/* Badges */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
           <h2 className="text-sm font-bold mb-3">뱃지 ({badges.length}/{badgeList.length})</h2>
           <div className="grid grid-cols-3 gap-2">
             {badgeList.map((b) => {
               const earned = user.points >= b.threshold;
               return (
-                <div key={b.name} className={`rounded-xl p-3 text-center transition ${earned ? "bg-gradient-to-br from-yellow-50 to-amber-50 border border-yellow-100" : "bg-gray-50 opacity-40"}`}>
+                <div key={b.name} className={`rounded-2xl p-3 text-center transition ${earned ? "bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-100" : "bg-gray-50 opacity-40"}`}>
                   <div className="text-xl mb-1">{b.icon}</div>
-                  <div className={`text-[10px] font-semibold leading-tight ${earned ? "text-gray-700" : "text-gray-400"}`}>{b.name}</div>
+                  <div className={`text-[10px] font-bold leading-tight ${earned ? "text-gray-700" : "text-gray-400"}`}>{b.name}</div>
                   <div className="text-[10px] text-gray-400">{b.desc}</div>
                 </div>
               );
@@ -130,27 +128,26 @@ function ProfileContent() {
         </div>
 
         {/* Point Rules */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
           <h2 className="text-sm font-bold mb-3">포인트 획득 방법</h2>
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {[
-              { act: "라이브 노트 작성", pts: "+1P", icon: "📝" },
-              { act: "질문 작성", pts: "+2P", icon: "❓" },
-              { act: "답변 작성", pts: "+3P", icon: "💬" },
-              { act: "AI 요약 생성", pts: "+5P", icon: "📋" },
-              { act: "답변 채택", pts: "+10P", icon: "✅" },
+              { act: "라이브 노트 작성", pts: "+1P", color: "bg-violet-50 text-violet-600" },
+              { act: "질문 작성", pts: "+2P", color: "bg-pink-50 text-pink-600" },
+              { act: "답변 작성", pts: "+3P", color: "bg-emerald-50 text-emerald-600" },
+              { act: "AI 요약 생성", pts: "+5P", color: "bg-purple-50 text-purple-600" },
+              { act: "답변 채택", pts: "+10P", color: "bg-amber-50 text-amber-600" },
             ].map((r) => (
-              <div key={r.act} className="flex items-center gap-3 text-sm">
-                <span className="text-base w-6 text-center">{r.icon}</span>
+              <div key={r.act} className="flex items-center gap-3">
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${r.color}`}>{r.pts}</span>
                 <span className="flex-1 text-gray-600 text-xs">{r.act}</span>
-                <span className="font-bold text-blue-600 text-xs">{r.pts}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Activity Feed */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
           <h2 className="text-sm font-bold mb-3">최근 활동</h2>
           <div className="space-y-3">
             {events.length === 0 && <p className="text-gray-400 text-xs text-center py-4">아직 활동 내역이 없어요</p>}
@@ -158,17 +155,17 @@ function ProfileContent() {
               const meta = getEventMeta(ev);
               return (
                 <div key={ev.id} className="flex items-start gap-3">
-                  <div className="w-7 h-7 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold text-blue-600">
+                  <div className="w-7 h-7 bg-gradient-to-br from-violet-100 to-purple-100 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold text-violet-600">
                     {ev.user.avatar || (ev.user.nickname || "?")[0]}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs leading-relaxed">
-                      <span className="font-semibold">{ev.user.nickname}</span>{" "}
+                      <span className="font-bold">{ev.user.nickname}</span>{" "}
                       <span className="text-gray-500">{eventLabels[ev.event] || ev.event}</span>
                       {meta.courseTitle && <span className="text-gray-400"> &middot; {meta.courseTitle}</span>}
                       {meta.title && <span className="text-gray-400 text-[10px]"> &ldquo;{(meta.title as string).slice(0, 25)}...&rdquo;</span>}
-                      {meta.badge && <span className="text-yellow-600 font-medium"> {meta.badge}</span>}
-                      {meta.level && <span className="text-blue-600 font-medium"> Lv.{meta.level}</span>}
+                      {meta.badge && <span className="text-amber-600 font-medium"> {meta.badge}</span>}
+                      {meta.level && <span className="text-violet-600 font-medium"> Lv.{meta.level}</span>}
                       {meta.days && <span className="text-orange-600 font-medium"> {meta.days}일</span>}
                     </p>
                     <p className="text-[10px] text-gray-300 mt-0.5">{timeAgo(ev.createdAt)}</p>
