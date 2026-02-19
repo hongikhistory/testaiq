@@ -4,28 +4,63 @@ import { useState, useEffect } from "react";
 import AuthGuard, { useUser } from "@/components/AuthGuard";
 import NavBar from "@/components/NavBar";
 
+// === DEMO DATA ===
+const DEMO_TAGS = ["Big-O", "시간복잡도", "정렬", "Stack", "Queue", "BST", "트리", "UX", "페르소나", "Figma", "디자인", "금리", "환율", "거시경제", "DP"];
+const DEMO_TAG_QUESTIONS: Record<string, { id: string; title: string; status: string; author: { nickname: string }; _count: { answers: number } }[]> = {
+  "Big-O": [
+    { id: "q1", title: "Big-O에서 상수를 무시하는 이유가 뭔가요?", status: "solved", author: { nickname: "Alex" }, _count: { answers: 3 } },
+  ],
+  "정렬": [
+    { id: "q2", title: "Merge Sort와 Quick Sort 중 어떤 걸 써야 하나요?", status: "solved", author: { nickname: "지우" }, _count: { answers: 2 } },
+  ],
+  "Stack": [
+    { id: "q3", title: "Stack으로 괄호 매칭하는 코드 예시 있나요?", status: "open", author: { nickname: "Sophia" }, _count: { answers: 2 } },
+  ],
+  "BST": [
+    { id: "q4", title: "BST에서 노드 삭제할 때 3가지 경우가 헷갈려요", status: "open", author: { nickname: "현우" }, _count: { answers: 1 } },
+  ],
+  "UX": [
+    { id: "q5", title: "UX 포트폴리오에 꼭 들어가야 할 요소가 뭔가요?", status: "open", author: { nickname: "지우" }, _count: { answers: 2 } },
+  ],
+  "금리": [
+    { id: "q6", title: "한미 금리 차이가 환율에 미치는 영향?", status: "solved", author: { nickname: "도현" }, _count: { answers: 2 } },
+  ],
+};
+
 function TagsContent() {
   const { user } = useUser();
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>(DEMO_TAGS);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [tagData, setTagData] = useState<{ summaries: unknown[]; questions: { id: string; title: string; status: string; author: { nickname: string }; _count: { answers: number } }[] } | null>(null);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<{ id: string; title: string; status: string }[]>([]);
 
   useEffect(() => {
-    fetch("/api/tags").then((r) => r.json()).then((d) => setTags(d.tags || []));
+    fetch("/api/tags").then((r) => r.json()).then((d) => {
+      if (d.tags?.length > 0) setTags(d.tags);
+    }).catch(() => {});
   }, []);
 
   async function loadTag(tag: string) {
     setSelectedTag(tag);
-    const data = await fetch(`/api/tags?tag=${encodeURIComponent(tag)}`).then((r) => r.json());
-    setTagData(data);
+    // Try API first, fallback to demo
+    try {
+      const data = await fetch(`/api/tags?tag=${encodeURIComponent(tag)}`).then((r) => r.json());
+      if (data.questions?.length > 0 || data.summaries?.length > 0) { setTagData(data); return; }
+    } catch {}
+    // Fallback to demo data
+    setTagData({ summaries: [], questions: DEMO_TAG_QUESTIONS[tag] || [] });
   }
 
   async function handleSearch() {
     if (!search.trim()) return;
-    const data = await fetch(`/api/tags?q=${encodeURIComponent(search)}`).then((r) => r.json());
-    setSearchResults(data.questions || []);
+    try {
+      const data = await fetch(`/api/tags?q=${encodeURIComponent(search)}`).then((r) => r.json());
+      if (data.questions?.length > 0) { setSearchResults(data.questions); return; }
+    } catch {}
+    // Fallback: search demo data
+    const results = Object.values(DEMO_TAG_QUESTIONS).flat().filter((q) => q.title.toLowerCase().includes(search.toLowerCase()));
+    setSearchResults(results);
   }
 
   return (
@@ -35,18 +70,9 @@ function TagsContent() {
         <h1 className="text-lg font-bold">태그 허브</h1>
 
         <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="키워드/태그 검색..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="flex-1 border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:outline-none transition"
-          />
-          <button onClick={handleSearch}
-            className="bg-gradient-to-r from-violet-500 to-purple-500 text-white px-5 py-3 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all whitespace-nowrap">
-            검색
-          </button>
+          <input type="text" placeholder="키워드/태그 검색..." value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            className="flex-1 border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-violet-400 focus:border-transparent focus:outline-none transition" />
+          <button onClick={handleSearch} className="bg-gradient-to-r from-violet-500 to-purple-500 text-white px-5 py-3 rounded-2xl text-xs font-bold active:scale-[0.98] transition-all whitespace-nowrap">검색</button>
         </div>
 
         {searchResults.length > 0 && (
@@ -70,12 +96,6 @@ function TagsContent() {
               #{tag}
             </button>
           ))}
-          {tags.length === 0 && (
-            <div className="w-full text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
-              <div className="text-3xl mb-2">🏷️</div>
-              <p className="text-gray-400 text-sm">아직 태그가 없어요</p>
-            </div>
-          )}
         </div>
 
         {selectedTag && tagData && (
@@ -95,16 +115,15 @@ function TagsContent() {
                     </div>
                     <h3 className="font-bold text-sm">{q.title}</h3>
                     <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                      <span>{q.author.nickname}</span>
-                      <span>💬 {q._count.answers}개 답변</span>
+                      <span>{q.author.nickname}</span><span>💬 {q._count.answers}개 답변</span>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-            {tagData.summaries.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-xs font-bold text-gray-500">관련 요약 ({tagData.summaries.length}개)</h3>
+            {tagData.questions.length === 0 && (
+              <div className="text-center py-8 bg-white rounded-3xl border border-dashed border-gray-200">
+                <p className="text-gray-400 text-sm">이 태그의 질문이 아직 없어요</p>
               </div>
             )}
           </div>
@@ -114,6 +133,4 @@ function TagsContent() {
   );
 }
 
-export default function TagsPage() {
-  return <AuthGuard><TagsContent /></AuthGuard>;
-}
+export default function TagsPage() { return <AuthGuard><TagsContent /></AuthGuard>; }
