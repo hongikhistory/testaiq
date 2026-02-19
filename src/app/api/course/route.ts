@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 
-// GET: list courses for user's group
+// GET: list ALL courses in user's group with enrollment status & rich stats
 export async function GET() {
   try {
     const user = await requireAuth();
@@ -12,23 +12,56 @@ export async function GET() {
       return NextResponse.json({ error: "Not in a group" }, { status: 400 });
     }
 
-    const memberships = await prisma.courseMember.findMany({
-      where: { userId: user.id },
+    // Get all courses in the group
+    const allCourses = await prisma.course.findMany({
+      where: { groupId: user.groupId },
       include: {
-        course: {
+        creator: { select: { nickname: true } },
+        sessions: {
+          orderBy: { startsAt: "asc" },
+          take: 1,
           include: {
-            sessions: {
-              orderBy: { startsAt: "asc" },
-              where: { startsAt: { gte: new Date() } },
-              take: 1,
-            },
-            _count: { select: { members: true } },
+            _count: { select: { liveNotes: true } },
           },
         },
+        _count: { select: { members: true, questions: true, sessions: true } },
       },
+      orderBy: { createdAt: "asc" },
     });
 
-    const courses = memberships.map((m) => m.course);
+    // Get total notes count per course
+    const courseIds = allCourses.map((c) => c.id);
+    const noteCounts = await prisma.session.groupBy({
+      by: ["courseId"],
+      where: { courseId: { in: courseIds } },
+      _count: { id: true },
+    });
+
+    // Get actual note counts via sessions
+    const sessionsWithNotes = await prisma.session.findMany({
+      where: { courseId: { in: courseIds } },
+      include: { _count: { select: { liveNotes: true } } },
+    });
+    const noteCountMap: Record<string, number> = {};
+    for (const s of sessionsWithNotes) {
+      noteCountMap[s.courseId] = (noteCountMap[s.courseId] || 0) + s._count.liveNotes;
+    }
+
+    // Get user's enrollments
+    const enrollments = await prisma.courseMember.findMany({
+      where: { userId: user.id },
+      select: { courseId: true },
+    });
+    const enrolledSet = new Set(enrollments.map((e) => e.courseId));
+
+    const courses = allCourses.map((c) => ({
+      ...c,
+      tags: c.tags,
+      isEnrolled: enrolledSet.has(c.id),
+      creatorName: c.creator?.nickname || "Unknown",
+      noteCount: noteCountMap[c.id] || 0,
+    }));
+
     return NextResponse.json({ courses });
   } catch (e) {
     if (e instanceof Error && e.message === "Unauthorized") {

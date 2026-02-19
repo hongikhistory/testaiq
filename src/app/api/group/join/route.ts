@@ -25,8 +25,22 @@ export async function POST(req: NextRequest) {
       data: { groupId: group.id },
     });
 
+    // Auto-enroll in all courses belonging to this group
+    const groupCourses = await prisma.course.findMany({
+      where: { groupId: group.id },
+      select: { id: true },
+    });
+
+    for (const course of groupCourses) {
+      await prisma.courseMember.upsert({
+        where: { courseId_userId: { courseId: course.id, userId: user.id } },
+        update: {},
+        create: { courseId: course.id, userId: user.id },
+      });
+    }
+
     await prisma.eventLog.create({
-      data: { userId: user.id, event: "group_joined", metadata: JSON.stringify({ groupId: group.id }) },
+      data: { userId: user.id, event: "group_joined", metadata: JSON.stringify({ groupId: group.id, autoEnrolledCourses: groupCourses.length }) },
     });
 
     return NextResponse.json({ group });
