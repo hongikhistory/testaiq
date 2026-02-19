@@ -21,6 +21,10 @@ export async function GET(req: NextRequest) {
       include: {
         author: { select: { id: true, nickname: true, schoolId: true } },
         session: { select: { id: true, weekLabel: true, startsAt: true } },
+        answers: {
+          include: { author: { select: { id: true, nickname: true } } },
+          orderBy: { createdAt: "asc" },
+        },
         _count: { select: { answers: true } },
       },
       orderBy: { createdAt: "desc" },
