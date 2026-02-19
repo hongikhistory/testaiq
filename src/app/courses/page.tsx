@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import AuthGuard, { useUser } from "@/components/AuthGuard";
 import NavBar from "@/components/NavBar";
@@ -13,7 +13,7 @@ interface Course {
 }
 
 const courseEmojis: Record<string, string> = {
-  CS: "💻", UX: "🎨", "경제": "📊", default: "📚",
+  CS: "\uD83D\uDCBB", UX: "\uD83C\uDFA8", "\uACBD\uC81C": "\uD83D\uDCCA", default: "\uD83D\uDCDA",
 };
 
 function getCourseEmoji(tags: string): string {
@@ -38,18 +38,56 @@ function CoursesContent() {
   const [groupData, setGroupData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState<string | null>(null);
+  const [setupStatus, setSetupStatus] = useState("");
   const [now] = useState(() => Date.now());
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/course").then((r) => r.json()),
+  const fetchCourses = useCallback(async () => {
+    const [courseData, gData] = await Promise.all([
+      fetch("/api/course").then((r) => r.json()).catch(() => ({ courses: [] })),
       fetch("/api/group").then((r) => r.json()).catch(() => null),
-    ]).then(([courseData, gData]) => {
-      setCourses(courseData.courses || []);
-      if (gData && !gData.error) setGroupData(gData);
-      setLoading(false);
-    });
+    ]);
+    setCourses(courseData.courses || []);
+    if (gData && !gData.error) setGroupData(gData);
+    return courseData;
   }, []);
+
+  // Auto-setup: seed DB + join group on cold start
+  const autoSetup = useCallback(async () => {
+    try {
+      // Step 1: Seed the database with demo data
+      setSetupStatus("데모 데이터 준비 중...");
+      await fetch("/api/seed", { method: "POST" });
+
+      // Step 2: Auto-join the default pilot group
+      setSetupStatus("그룹에 참여하는 중...");
+      await fetch("/api/group/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteCode: "CAMPUS2026" }),
+      });
+
+      // Step 3: Re-fetch courses
+      setSetupStatus("수업 불러오는 중...");
+      await fetchCourses();
+      setSetupStatus("");
+    } catch {
+      setSetupStatus("");
+    }
+  }, [fetchCourses]);
+
+  useEffect(() => {
+    async function init() {
+      const courseData = await fetchCourses();
+      const courseList = courseData.courses || [];
+
+      // If no courses found (likely cold start), auto-setup
+      if (courseList.length === 0 || courseData.error) {
+        await autoSetup();
+      }
+      setLoading(false);
+    }
+    init();
+  }, [fetchCourses, autoSetup]);
 
   async function createCourse(e: React.FormEvent) {
     e.preventDefault();
@@ -60,8 +98,7 @@ function CoursesContent() {
     });
     if (res.ok) {
       setShowCreate(false); setTitle(""); setDescription("");
-      const data = await fetch("/api/course").then((r) => r.json());
-      setCourses(data.courses || []);
+      await fetchCourses();
     }
   }
 
@@ -74,8 +111,7 @@ function CoursesContent() {
     });
     if (res.ok) {
       setShowJoin(false); setJoinCode("");
-      const data = await fetch("/api/course").then((r) => r.json());
-      setCourses(data.courses || []);
+      await fetchCourses();
     }
   }
 
@@ -87,8 +123,7 @@ function CoursesContent() {
       body: JSON.stringify({ inviteCode }),
     });
     if (res.ok) {
-      const data = await fetch("/api/course").then((r) => r.json());
-      setCourses(data.courses || []);
+      await fetchCourses();
     }
     setJoining(null);
   }
@@ -101,8 +136,16 @@ function CoursesContent() {
     <div className="min-h-screen bg-gradient-to-b from-violet-50/50 to-white has-bottom-nav">
       <NavBar nickname={user?.nickname || ""} points={user?.points || 0} />
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-5">
+        {/* Loading / Setup status */}
+        {(loading || setupStatus) && (
+          <div className="text-center py-16 space-y-3">
+            <div className="animate-spin h-8 w-8 border-3 border-violet-500 border-t-transparent rounded-full mx-auto" />
+            <p className="text-sm text-violet-500 font-medium">{setupStatus || "로딩 중..."}</p>
+          </div>
+        )}
+
         {/* School Battle */}
-        {scores && (
+        {!loading && !setupStatus && scores && (
           <div className="bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 rounded-3xl p-5 text-white shadow-lg shadow-violet-200/50">
             <h2 className="text-sm font-bold opacity-90 mb-3 flex items-center gap-1.5">School Battle</h2>
             <div className="grid grid-cols-2 gap-3">
@@ -119,7 +162,7 @@ function CoursesContent() {
         )}
 
         {/* Quick Stats */}
-        {!loading && courses.length > 0 && (
+        {!loading && !setupStatus && courses.length > 0 && (
           <div className="grid grid-cols-3 gap-2.5">
             {[
               { val: courses.length, label: "수업", color: "text-violet-600", bg: "bg-violet-50" },
@@ -135,16 +178,18 @@ function CoursesContent() {
         )}
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <button onClick={() => { setShowCreate(!showCreate); setShowJoin(false); }}
-            className="flex-1 bg-gradient-to-r from-violet-600 to-purple-500 text-white px-4 py-3 rounded-2xl text-sm font-bold active:scale-[0.98] transition-all shadow-sm shadow-violet-200">
-            + 수업 만들기
-          </button>
-          <button onClick={() => { setShowJoin(!showJoin); setShowCreate(false); }}
-            className="flex-1 bg-white border border-violet-200 px-4 py-3 rounded-2xl text-sm font-bold text-violet-700 active:scale-[0.98] transition-all">
-            코드로 참여하기
-          </button>
-        </div>
+        {!loading && !setupStatus && (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button onClick={() => { setShowCreate(!showCreate); setShowJoin(false); }}
+              className="flex-1 bg-gradient-to-r from-violet-600 to-purple-500 text-white px-4 py-3 rounded-2xl text-sm font-bold active:scale-[0.98] transition-all shadow-sm shadow-violet-200">
+              + 수업 만들기
+            </button>
+            <button onClick={() => { setShowJoin(!showJoin); setShowCreate(false); }}
+              className="flex-1 bg-white border border-violet-200 px-4 py-3 rounded-2xl text-sm font-bold text-violet-700 active:scale-[0.98] transition-all">
+              코드로 참여하기
+            </button>
+          </div>
+        )}
 
         {showCreate && (
           <form onSubmit={createCourse} className="bg-white rounded-3xl shadow-sm border border-violet-100 p-5 space-y-3">
@@ -164,72 +209,73 @@ function CoursesContent() {
         )}
 
         {/* My Enrolled Courses */}
-        <div className="space-y-3">
-          <h2 className="text-base font-bold text-gray-800">내 수업</h2>
-          {loading && <div className="text-center py-12"><div className="animate-spin h-6 w-6 border-3 border-violet-500 border-t-transparent rounded-full mx-auto" /></div>}
-          {!loading && enrolled.length === 0 && (
-            <div className="text-center py-8 bg-white rounded-3xl border border-dashed border-violet-200">
-              <div className="text-3xl mb-2">📚</div>
-              <p className="text-gray-400 text-sm">{available.length > 0 ? "아래 수업에 참여해보세요!" : "아직 수업이 없어요. 만들어보세요!"}</p>
-            </div>
-          )}
-          {enrolled.map((course) => {
-            const nextSession = course.sessions?.[0];
-            const isLive = nextSession && new Date(nextSession.startsAt).getTime() - 600000 <= now && new Date(nextSession.endsAt).getTime() + 600000 >= now;
-            const tags: string[] = (() => { try { return JSON.parse(course.tags); } catch { return []; } })();
-            const emoji = getCourseEmoji(course.tags);
-            return (
-              <div key={course.id} onClick={() => router.push(`/courses/${course.id}`)}
-                className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 sm:p-5 cursor-pointer card-hover">
-                <div className="flex items-start gap-3">
-                  <div className="w-11 h-11 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
-                    {emoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold text-sm sm:text-base truncate">{course.title}</h3>
-                      {isLive && (
-                        <span className="flex items-center gap-1 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />LIVE
-                        </span>
+        {!loading && !setupStatus && (
+          <div className="space-y-3">
+            <h2 className="text-base font-bold text-gray-800">내 수업</h2>
+            {enrolled.length === 0 && (
+              <div className="text-center py-8 bg-white rounded-3xl border border-dashed border-violet-200">
+                <div className="text-3xl mb-2">{"\uD83D\uDCDA"}</div>
+                <p className="text-gray-400 text-sm">{available.length > 0 ? "아래 수업에 참여해보세요!" : "아직 수업이 없어요. 만들어보세요!"}</p>
+              </div>
+            )}
+            {enrolled.map((course) => {
+              const nextSession = course.sessions?.[0];
+              const isLive = nextSession && new Date(nextSession.startsAt).getTime() - 600000 <= now && new Date(nextSession.endsAt).getTime() + 600000 >= now;
+              const tags: string[] = (() => { try { return JSON.parse(course.tags); } catch { return []; } })();
+              const emoji = getCourseEmoji(course.tags);
+              return (
+                <div key={course.id} onClick={() => router.push(`/courses/${course.id}`)}
+                  className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 sm:p-5 cursor-pointer card-hover">
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl flex items-center justify-center text-xl flex-shrink-0">
+                      {emoji}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-bold text-sm sm:text-base truncate">{course.title}</h3>
+                        {isLive && (
+                          <span className="flex items-center gap-1 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />LIVE
+                          </span>
+                        )}
+                      </div>
+                      {course.description && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{course.description}</p>}
+                      {tags.length > 0 && (
+                        <div className="flex gap-1 mt-2 flex-wrap">
+                          {tags.slice(0, 3).map((t) => <span key={t} className="text-[10px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full font-medium">{t}</span>)}
+                        </div>
                       )}
                     </div>
-                    {course.description && <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{course.description}</p>}
-                    {tags.length > 0 && (
-                      <div className="flex gap-1 mt-2 flex-wrap">
-                        {tags.slice(0, 3).map((t) => <span key={t} className="text-[10px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full font-medium">{t}</span>)}
-                      </div>
-                    )}
                   </div>
-                </div>
-                {/* Stats bar */}
-                <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-4 text-[11px] text-gray-400">
-                  <span className="flex items-center gap-1">
-                    <span className="text-violet-400">👥</span> {course._count.members}명
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="text-emerald-400">📝</span> {course.noteCount}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="text-pink-400">💬</span> {course._count.questions}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="text-amber-400">📅</span> {course._count.sessions}
-                  </span>
-                  <span className="ml-auto text-[10px] font-mono text-gray-300">{course.inviteCode}</span>
-                </div>
-                {nextSession && (
-                  <div className="mt-2 text-xs text-gray-400">
-                    다음 수업: {new Date(nextSession.startsAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric", weekday: "short" })} {new Date(nextSession.startsAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+                  {/* Stats bar */}
+                  <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-4 text-[11px] text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <span className="text-violet-400">{"\uD83D\uDC65"}</span> {course._count.members}명
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="text-emerald-400">{"\uD83D\uDCDD"}</span> {course.noteCount}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="text-pink-400">{"\uD83D\uDCAC"}</span> {course._count.questions}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="text-amber-400">{"\uD83D\uDCC5"}</span> {course._count.sessions}
+                    </span>
+                    <span className="ml-auto text-[10px] font-mono text-gray-300">{course.inviteCode}</span>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  {nextSession && (
+                    <div className="mt-2 text-xs text-gray-400">
+                      다음 수업: {new Date(nextSession.startsAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric", weekday: "short" })} {new Date(nextSession.startsAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Available Courses */}
-        {!loading && available.length > 0 && (
+        {!loading && !setupStatus && available.length > 0 && (
           <div className="space-y-3">
             <h2 className="text-base font-bold text-gray-800">참여 가능한 수업</h2>
             <p className="text-xs text-gray-400 -mt-2">&quot;참여&quot; 버튼을 눌러 바로 등록하세요</p>
@@ -258,9 +304,9 @@ function CoursesContent() {
                     </button>
                   </div>
                   <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-4 text-[11px] text-gray-400">
-                    <span>👥 {course._count.members}명</span>
-                    <span>📝 {course.noteCount}</span>
-                    <span>💬 {course._count.questions}</span>
+                    <span>{"\uD83D\uDC65"} {course._count.members}명</span>
+                    <span>{"\uD83D\uDCDD"} {course.noteCount}</span>
+                    <span>{"\uD83D\uDCAC"} {course._count.questions}</span>
                     <span className="ml-auto text-gray-300">by {course.creatorName}</span>
                   </div>
                 </div>
