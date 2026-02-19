@@ -16,12 +16,30 @@ function OnboardingForm() {
   const [schoolId, setSchoolId] = useState("");
   const [nickname, setNickname] = useState("");
   const [termsAgreed, setTermsAgreed] = useState(false);
-  const [inviteCode, setInviteCode] = useState(invite);
+  const [inviteCode, setInviteCode] = useState(invite || "CAMPUS2026");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [initLoading, setInitLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/schools").then((r) => r.json()).then((d) => setSchools(d.schools || []));
+    async function init() {
+      // Fetch schools
+      let data = await fetch("/api/schools").then((r) => r.json()).catch(() => ({ schools: [] }));
+
+      // If no schools exist, auto-seed the database first
+      if (!data.schools || data.schools.length === 0) {
+        await fetch("/api/seed", { method: "POST" }).catch(() => {});
+        data = await fetch("/api/schools").then((r) => r.json()).catch(() => ({ schools: [] }));
+      }
+
+      setSchools(data.schools || []);
+      // Default to first Korean school
+      const kr = (data.schools || []).find((s: { countryCode: string }) => s.countryCode === "KR");
+      if (kr) setSchoolId(kr.id);
+
+      setInitLoading(false);
+    }
+    init();
   }, []);
 
   async function handleOnboarding() {
@@ -45,6 +63,17 @@ function OnboardingForm() {
       router.push("/courses");
     } catch (err) { setError(err instanceof Error ? err.message : "오류가 발생했어요"); }
     finally { setLoading(false); }
+  }
+
+  if (initLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50">
+        <div className="text-center space-y-3">
+          <div className="animate-spin h-8 w-8 border-3 border-violet-500 border-t-transparent rounded-full mx-auto" />
+          <p className="text-sm text-violet-500 font-medium">준비 중...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -105,22 +134,24 @@ function OnboardingForm() {
           {step === 3 && (
             <>
               <div className="text-center py-2">
-                <div className="text-3xl mb-2">\uD83C\uDF89</div>
-                <p className="text-sm text-gray-600">환영합니다! 파일럿 그룹에 참여하고 다른 학교와 경쟁해보세요.</p>
+                <div className="text-3xl mb-2">{"\uD83C\uDF89"}</div>
+                <p className="text-sm text-gray-600">환영합니다! 그룹에 참여하고 수업을 시작해보세요.</p>
+              </div>
+              <div className="bg-violet-50 rounded-2xl p-3 text-center">
+                <p className="text-[11px] text-violet-400 mb-1">파일럿 그룹 초대 코드</p>
+                <p className="text-lg font-bold text-violet-700 tracking-[0.2em] font-mono">CAMPUS2026</p>
               </div>
               <input type="text" placeholder="그룹 초대 코드" value={inviteCode} onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                 className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-center tracking-[0.3em] font-mono text-sm focus:ring-2 focus:ring-violet-400 focus:outline-none" />
               <button onClick={handleGroupJoin} disabled={loading}
                 className="w-full bg-gradient-to-r from-violet-600 via-purple-500 to-pink-500 text-white py-3.5 rounded-2xl font-bold text-sm disabled:opacity-50 active:scale-[0.98] transition-all">
-                {loading ? "잠시만요..." : inviteCode ? "그룹 참여" : "건너뛰기"}
+                {loading ? "잠시만요..." : inviteCode ? "그룹 참여하기" : "건너뛰기"}
               </button>
             </>
           )}
 
           {error && <p className="text-red-500 text-xs bg-red-50 rounded-xl px-3 py-2 text-center">{error}</p>}
         </div>
-
-        {step === 3 && <p className="text-center text-[11px] text-gray-300">체험: CAMPUS2026</p>}
       </div>
     </div>
   );

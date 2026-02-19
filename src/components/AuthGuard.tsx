@@ -43,7 +43,7 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
     if (!loading && user && !user.onboarded) router.push("/onboarding");
   }, [user, loading, router]);
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" /></div>;
+  if (loading) return <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-violet-50/50 to-white"><div className="animate-spin h-8 w-8 border-3 border-violet-500 border-t-transparent rounded-full" /></div>;
   if (!user || !user.onboarded) return null;
 
   return <>{children}</>;
